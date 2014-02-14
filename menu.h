@@ -1,4 +1,5 @@
-/* 
+
+/*
  * File:   menu.h
  * Author: victor
  *
@@ -15,14 +16,12 @@ void readFile() {
 	char line[180];
 	int i = 0;
 	
-	int j = 0, k = 0, l=0; // count for totalJobs
-	char totalJobsC[10], totalMachinesC[5], tmp[5]; // tmp to get strings
-	int totalJobs, totalMachines; // after atoi(totalJobsC)
+	int j = 0, k = 0, l=0, tmpJ[20]; // count for totalJobs
+	char tmp[5]; // tmp to get strings
+	int totalJobs, totalMachines, maq=0,tempo=0; // after atoi(totalJobsC)
 	// Create the Job list w/ enough machine times
-	Jobs jobs[totalJobs];
-	
-	// Defines the final relation job-machine
-	//JobList jobs;
+	Jobs jobs[1000];
+
 	// Get the file and read it
 	file = fopen("1011.txt", "r"); // open for reading
 	
@@ -30,32 +29,10 @@ void readFile() {
 		i++;
 		// 1st line - nr of jobs<space>number of machines<space>1
 		if(i == 1) {
-			// Keep running until we reach the end of line
-			while(1) {
-				// Until reach the first space, get the number of jobs			
-				while(line[j] != ' ') {
-					totalJobsC[k++] = line[j];
-					j++;
-				}
-				j++; // so we pass the ' '
-				totalJobs = atoi(totalJobsC);
-				printf("Total de jobs: %d\n", totalJobs);
-				//printf("Na posicao %d da linha %d achou o caractere '%c'\n", j, i, line[j]);
-				
-				// Until reach the second space, get the number of machines
-				k=0;
-				while(line[j] != ' ') {
-					totalMachinesC[k++] = line[j++];
-				}
-				totalMachines = atoi(totalMachinesC);
-				printf("Total de machines: %d\n", totalMachines);
-				
-				// Until reach the line break, do nothing (?)
-				//exit(EXIT_SUCCESS);
-				
-				// Done with the first line
-				break;
-			}
+			
+			sscanf(line,"%d %d %d", &totalJobs, &totalMachines, &j);
+			//printf("Total de jobs: %d. Total de maquinas: %d", totalJobs,totalMachines);
+			//exit(1);
 			
 			// goto 2nd line
 			continue;
@@ -67,61 +44,58 @@ void readFile() {
 			printf("LINHA 2\n");
 			
 			// Creates the jobs array and each position being a machine time
-			
+			for(j=0;j<totalJobs;j++) {
+				initArray(&jobs[i].job.maquina, totalMachines);
+				initArray(&jobs[i].job.tempo, totalMachines);
+			}
 			continue;
 		}
 		// 3rd line to 10002nd line - <tab>MACHINENR<tab>TIMEOFJOBLINE
 		j=0;
 		k=0;
 		
-		while(line[j] != '\0' && line[j] != '\n') {
-			// k = 1 machine 0
-			// k = 2 job time in machine 0
-			// k = 3 machine 1...
-			if(line[j] == '\t') {
-				j++;
-				k++;
-				continue;
-			}
-			// Get whatever it is
-			l=0;
-			//tmp[0] = '\0'; // reset
-			memset( tmp, '\0', sizeof(tmp) );
-			//strcpy(tmp, "");
-			while(line[j] != '\t') {
-				//printf("Para k=%d joguei dentro da string '%c'\n", k, line[j]);
-				tmp[l] = line[j];
-				l++;
+		while(line[j] != '\0' ) {
+			
+			sscanf(line,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+					&tmpJ[0], &tmpJ[1], &tmpJ[2], &tmpJ[3], &tmpJ[4], &tmpJ[5], &tmpJ[6], &tmpJ[7], &tmpJ[8], &tmpJ[9],
+					&tmpJ[10], &tmpJ[11], &tmpJ[12], &tmpJ[13], &tmpJ[14], &tmpJ[15], &tmpJ[16], &tmpJ[17], &tmpJ[18], &tmpJ[19]);
+			k = 0;
+			
+			for(j=0;j<totalMachines*2;j++) {
+				//printf("Maq %d Tem %d\n", jobs[i-3].job.maquina.array[0], jobs[i-3].job.tempo.array[0]);
+				insertArray(&jobs[i-3].job.maquina, tmpJ[j]);
+				insertArray(&jobs[i-3].job.tempo, tmpJ[j+1]);
+				printf("Maq %d Tem %d\n", jobs[i-3].job.maquina.array[0], jobs[i-3].job.tempo.array[0]);
+				printf("Add maq %d com tem %d\n", tmpJ[j], tmpJ[j+1]);
 				j++;
 			}
-			// Closes the string
-			tmp[l+1] = '\0';
+			printf("1o Job\n\n");
+			for(j=0;j<totalMachines;j=j++) {
+				printf("Maquina %d Tempo %d\n", jobs[i-3].job.maquina.array[j], jobs[i-3].job.tempo.array[j]);
+				j++;
+			}
+			//freeArray(&jobs);
+			exit(1);
+			printf("FIM DA LINHA 2");
 			
-			printf("k: %d. String: %d\n",k,atoi(tmp));
 			
-			
-			// new machine
-			if(k%2 == 1)
-				jobs[i].maquina = atoi(tmp);
-			else
-				jobs[i].tempo = atoi(tmp);
-			k++;
-			//printf("LINHA %d machine %d job %d: \"%d\"\n", i, jobs[i].maquina, i, jobs[i].tempo);
-			j++;
 		}
 		//exit(EXIT_SUCCESS);
+		// Saiu da linha
+		printf("\n\ntotalMachines: %zd | total maquinas: %zd", totalMachines, jobs[i-3].job.maquina.used);
+		exit(1);
+		for(j=0;j<totalMachines;j++)
+			printf("Job %d Maquina %d: Tempo: %d \n", i,jobs[i-3].job.maquina.array[j], jobs[i-3].job.tempo.array[j]);
+		exit(EXIT_SUCCESS);
 		
 		//fputs(line,stdout);
 		// For each line, I need to create all of the jobs with respective machine times
 		//printf("%c - %c - %c", line[0], line[1], line[2]);
 		// Print everything
 		
-		// @todo A logica de jobs[i].maquina esta errada
-		printf("Job %i\n", j);
-		for(j=0;j<totalMachines;j++) {
-			//printf("Maquina %d: %d", jobs[i].)
-		}
-		printf("")
+		printf("Jobs %d\n", i);
+		
+		
 		exit(1);
 	}
 	fclose(file);
@@ -136,8 +110,8 @@ void generateMenu() {
 	printf("########## HEURISTICS ARTICLE ##########\n\n");
 	printf("1 - Generates initial solution\n");
 	printf("2 - Local Search\n");
-	printf("3 - ILS\n");
-	printf("4 - GRASP\n");
+	printf("3 - Genetic Algorithm\n");
+	printf("4 - VNS\n");
 	printf("5 - Exit\n");
 	
 	/*

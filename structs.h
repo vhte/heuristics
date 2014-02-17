@@ -19,6 +19,7 @@ void insertArray(Array *a, int element) {
     a->size *= 2;
     a->array = (int *)realloc(a->array, a->size * sizeof(int));
   }
+  //printf("***Colocando na posicao %d o valor %d. O tamanho usado e: %d, o tamanho total e: %zd***\n", a->used, element, a->used, a->size);
   a->array[a->used++] = element;
 }
 
@@ -36,3 +37,8 @@ typedef struct {
 typedef struct {
 	Job job;
 } Jobs;
+
+// Solution
+typedef struct {
+	Array jobs; // Each job has a time 
+} Machine;

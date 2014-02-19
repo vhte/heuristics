@@ -39,6 +39,9 @@ typedef struct {
 } Jobs;
 
 // Solution
-typedef struct {
+/*typedef struct {
 	Array jobs; // Each job has a time 
-} Machine;
+} Machine;*/
+typedef struct {
+	Array jobs;
+} Machines;

@@ -1,16 +1,13 @@
+
 /*
  * File:   menu.h
  * Author: victor
  *
  * Created on January 14, 2014, 11:12 AM
  */
-void localSearch() {
-	printf("\nEXECUTOU BUSCA LOCAL\n");
-}
-
 // @todo WTF is the 1 at the end of the 1st line?
 // @todo Maybe a first read to know how much jobs and machines we have and put it in Jobs jobs[num]
-void readFile(bool debug) {
+void readFile() {
 	// Declares file pointer
 	FILE *file;
 	char line[180];
@@ -21,7 +18,7 @@ void readFile(bool debug) {
 	//Jobs jobs[1000];
 
 	// Get the file and read it
-	file = fopen("1011.txt", "r"); // open for reading
+	file = fopen("111.txt", "r"); // open for reading
 	
 	while(fgets(line, sizeof line,file) != NULL) {
 		i++;
@@ -103,25 +100,77 @@ void readFile(bool debug) {
 }
 
 // Initial solution = For each job, gets the shortest time and put it in the machine attached to this time
+// @todo free(&jobs). We don't need it anymore
 void initialSolution() {
-	Machine machines[totalMachines];
-	return machines;
-	// Initializing solution array
-	/*int i = 0,j=0;
+	int i=0,j,menor,melhorMaq;
+	// Initialize number of machines
 	for(;i<totalMachines;i++)
-		initArray(&machines[i], 1); // I don't know how many jobs'll be alocated to each machine
+		initArray(&machines[i], totalJobs);
 	
+	// For each job...
 	for(i=0;i<totalJobs;i++) {
-		// To each job, I'll find which machine has the shorter time
-		int bestMachine, bestTime = INT_MAX;
-		for(j=0;j<totalMachines;j++) {
-			if(jobs.[i].job.tempo[j] < bestTime) {
-				bestMachine = i;
-				bestTime = jobs.[i].job.tempo[j];
+		// ... allocate the shortest time to selected machine
+		menor = INT_MAX;
+		for(j=0;j<jobs[i].job.tempo.used;j++) {
+			if(jobs[i].job.tempo.array[j] < menor) {
+				menor = jobs[i].job.tempo.array[j];
+				melhorMaq = jobs[i].job.maquina.array[j];
 			}
 		}
-	}*/
+		// allocate...
+		insertArray(&machines[melhorMaq], menor);
+	}
+	
+	printf("Solucao Inicial Gulosa gerada.\n\n");
+	// Just show the initial solution
+	for(i=0;i<totalMachines;i++) {
+		printf("Maquina %d: ", i);
+		for(j=0;j<machines[i].used;j++) {
+			printf("%d ", machines[i].array[j]);
+		}
+		printf("\nTotal: %d Ci = %d\n\n", machines[i].used, Ci(&machines[i]));
+	}
+	
+	//printf("\n%d\n", machines[0].jobs.used);
+	//return;
+	
 	printf("\nGEROU SOLUCAO INICIAL\n");
+	printf("Makespan: %d\n", makespan());
+	return;
+}
+
+int Ci(Array *machine) {
+	int i=0,sum=0;
+	for(;i < machine->used;i++)
+		sum += machine->array[i];
+	
+	return sum;
+}
+
+// How much makespan C(max) is?
+int makespan() {
+	int i = 0, worstTime = 0, worstMachine, tmp;
+	for(;i<totalMachines;i++) {
+		tmp = Ci(&machines[i]);
+		if(tmp > worstTime) {
+			worstTime = tmp;
+			worstMachine = i;
+		}
+	}
+	return worstTime;
+}
+
+// Uses insertion and interchange movements and tries to find best neighboor
+// Stop criteria: 15 moves without get better (lesser) Cmax
+// Neighboorhood size: 0.1*(n*(m-1))
+// RNVD?
+void localSearch() {
+	int iteration = 0;
+	float iterations = 0.1*(totalJobs*(totalMachines-1));
+	// @todo use int value for iterations
+	while(iteration < iterations) {
+		//
+	}
 }
 
 void generateMenu() {

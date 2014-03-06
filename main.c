@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <limits.h>
+#include <time.h>
 #include "util.h"
 #include "structs.h"
 // Create the Job list w/ enough machine times. Need to be created here because needs structs.h file and it'll be used in menu.h
@@ -19,10 +20,6 @@ Array machines[10];
 bool debug = true;
 // Solution struct
 #include "menu.h"
-/*
- * 
- */
-
 
 int main(int argc, char** argv) {
 	// Loads and set jobs time in each machine

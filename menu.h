@@ -90,9 +90,6 @@ void readFile() {
 		// Print everything
 		if(debug)
 			printf("Jobs %d\n", i-3);
-		
-		
-		//exit(1);
 	}
 	fclose(file);
 	
@@ -160,17 +157,68 @@ int makespan() {
 	return worstTime;
 }
 
-// Uses insertion and interchange movements and tries to find best neighboor
+// Uses insertion and interchange movements and tries to find best neighboor.
+// Moves: Interchange and Insertion 1x
 // Stop criteria: 15 moves without get better (lesser) Cmax
 // Neighboorhood size: 0.1*(n*(m-1))
 // RNVD?
 void localSearch() {
-	int iteration = 0;
-	float iterations = 0.1*(totalJobs*(totalMachines-1));
-	// @todo use int value for iterations
+	int iteration = 0, mach1,mach2,job1,job2,tmp,worst;
+	// How many iterations I'll make to get the best.  10% of totalJobs*(totalMachines-1)
+	int iterations = 0.1*(totalJobs*(totalMachines-1));
+	if(debug)
+		printf("TOTAL ITERATIONS: %d\n", iterations);
+	
+	// Let's get the worst solution so far
+	worst = makespan();
+	
+	// Find best interchange
 	while(iteration < iterations) {
-		//
+		// I need two machines. Find them randomly
+		mach1 = getRand(0, totalMachines-1);
+		mach2 = getRand(0, totalMachines-1);
+		
+		// In these machines, get a random job
+		job1 = getRand(0,machines[mach1].used-1);
+		job2 = getRand(0,machines[mach2].used-1);
+		
+		// Now interchange them
+		//printf("TESTE: %d %d\n", machines[0].array[0], machines[0].array[1]);
+		//printf("BEFORE:\nMaq %d Job %d: %d\nMaq %d Job %d: %d\n",mach1, job1, machines[mach1].array[job1], mach2,job2,machines[mach2].array[job2]);
+		//printf("makespan: %d\n\n", makespan());
+		tmp = machines[mach1].array[job1];
+		machines[mach1].array[job1] = machines[mach2].array[job2];
+		machines[mach2].array[job2] = tmp;
+		//printf("AFTER:\nMaq %d Job %d: %d\nMaq %d Job %d: %d\n\n",mach1, job1, machines[mach1].array[job1], mach2,job2,machines[mach2].array[job2]);
+		//printf("makespan: %d\n\n", makespan());
+		//return;
+		
+		// I'll now check if this solution is better than the best one.
+		// I'll allow movements without makespan time changes just to do the movement
+		if(makespan() > worst) {
+			// That's not a good option, let's rollback
+			tmp = machines[mach1].array[job1];
+			machines[mach1].array[job1] = machines[mach2].array[job2];
+			machines[mach2].array[job2] = tmp;
+		}
+		
+		// Ok, that was one iteration
+		iteration++;
 	}
+	if(debug)
+		printf("\nmakespan final interchange: %d\n", makespan());
+	// Ok, now that I've the best Interchange, let's get this solution and make Insertion mods
+	while(iteration < iterations) {
+		// Find best insertion
+	}
+	
+	// Best interchange/insertion
+	
+	// return best solution so far
+}
+
+void GA() {
+	//
 }
 
 void generateMenu() {
@@ -178,9 +226,10 @@ void generateMenu() {
 	printf("########## HEURISTICS ARTICLE ##########\n\n");
 	printf("1 - Generates initial solution\n");
 	printf("2 - Local Search\n");
-	printf("3 - Genetic Algorithm\n");
-	printf("4 - VNS\n");
-	printf("5 - Exit\n");
+	printf("3 - Genetic Algorithm (GA)\n");
+	printf("4 - Iterated Greedy\n");
+	printf("5 - VNS\n");
+	printf("6 - Exit\n");
 	
 	/*
 	 The most common error when using getchar() is to try and use a char variable to store the result. You need to use an int variable, since the range of values getchar() returns is "a value in the range of unsigned char, plus the single negative value EOF". A char variable doesn't have sufficient range for this, which can mean that you can confuse a completely valid character return with EOF. The same applies to getc().
@@ -202,8 +251,12 @@ void generateMenu() {
 			localSearch();
 			generateMenu();
 			break;
+		case '3':
+			GA();
+			generateMenu();
+			break;
 		// Exits the program
-		case '5':
+		case '6':
 			// Clean dynamic arrays
 			//freeArray(&jobs[i-3].job.maquina);
 			exit(EXIT_SUCCESS); // EXIT_FAILURE

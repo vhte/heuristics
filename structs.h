@@ -23,6 +23,18 @@ void insertArray(Array *a, int element) {
   a->array[a->used++] = element;
 }
 
+void removeArray(Array *a, int position) {
+	// n  = n+1
+	int i;
+	for(i = position;i < a->used;i++) {
+		// exception for the last i
+		if(i != a->used - 1)
+			a->array[i] = a->array[i+1];
+	}
+	// Just update used var
+	a->used = a->used - 1;
+}
+
 void freeArray(Array *a) {
   free(a->array);
   a->array = NULL;

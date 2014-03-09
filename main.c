@@ -14,7 +14,7 @@
 #include "util.h"
 #include "structs.h"
 // Create the Job list w/ enough machine times. Need to be created here because needs structs.h file and it'll be used in menu.h
-Jobs jobs[100];
+Jobs jobs[1000];
 int totalJobs, totalMachines;
 Array machines[10];
 bool debug = true;

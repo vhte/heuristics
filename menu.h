@@ -139,6 +139,7 @@ void initialSolution() {
 
 int Ci(Array *machine) {
 	int i=0,sum=0;
+	//printf("machine->used: %d\n",machine->used);
 	for(;i < machine->used;i++)
 		sum += machine->array[i];
 	
@@ -147,80 +148,91 @@ int Ci(Array *machine) {
 
 // How much makespan C(max) is?
 int makespan() {
+	
 	int i = 0, worstTime = 0, worstMachine, tmp;
 	for(;i<totalMachines;i++) {
+		//printf("machine %d ",i);
 		tmp = Ci(&machines[i]);
+		
 		if(tmp > worstTime) {
 			worstTime = tmp;
 			worstMachine = i;
 		}
 	}
+	
 	return worstTime;
 }
 
-// Uses insertion and interchange movements and tries to find best neighboor.
+// RVND
+// Uses insertion and interchange movements and tries to find best neighbor.
 // Moves: Interchange and Insertion 1x
 // Stop criteria: 15 moves without get better (lesser) Cmax
-// Neighboorhood size: 0.1*(n*(m-1))
+// Neighborhood size: 0.1*(n*(m-1))
 // RNVD?
+// @todo If no parameter is passed, uses global (the answer to the problem)
 void localSearch() {
-	int iteration = 0, equalRounds = 0, mach1,mach2,job1,job2,tmp,worst;
-	// How many iterations I'll make to get the best.  10% of totalJobs*(totalMachines-1)
-	int iterations = 0.1*(totalJobs*(totalMachines-1));
-	if(debug)
-		printf("TOTAL ITERATIONS: %d\n", iterations);
+	int iteration = 0, vizinhanca, mach1,mach2,job1,job2,tmp,worst,bestMach1,bestMach2,bestJob1,bestJob2,k,j;
+	char mov; // inter'c'hange or 'i'nsertion. Need this to replace current solution to its best neighbor
 	
-	while(equalRounds < 15) {
-		// Let's get the worst solution so far
-		worst = makespan();
-
-		// Find best interchange
-		while(iteration < iterations) {
+	// How many iterations I'll make to get the best.  10% of totalJobs*(totalMachines-1) NEIGHBORHOOD
+	vizinhanca = 0.1*(totalJobs*(totalMachines-1));
+	if(debug)
+		printf("TAMANHO VIZINHANCA: %d\n", vizinhanca);
+	
+	// The worst solution is INT_MAX just to tell the 1st neighbor is the best and initialize
+	worst = INT_MAX;
+	
+	printf("worst: %d\n", worst);
+	while(iteration < vizinhanca) {
+		// Using DescidaRandomica
+		// Choose 0 for interchange, 1 for insertion
+		if(getRand(0,1) == 0) {
+			// Interchange
 			// I need two machines. Find them randomly
 			mach1 = getRand(0, totalMachines-1);
+			//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
+			while(machines[mach1].used == 0)
+				mach1 = getRand(0, totalMachines-1);
+			//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
 			mach2 = getRand(0, totalMachines-1);
-
+			while(machines[mach2].used == 0) // Not the same machine
+				mach2 = getRand(0, totalMachines-1);
+		
 			// In these machines, get a random job
 			job1 = getRand(0,machines[mach1].used-1);
 			job2 = getRand(0,machines[mach2].used-1);
-
 			// Now interchange them
 			//printf("TESTE: %d %d\n", machines[0].array[0], machines[0].array[1]);
 			//printf("BEFORE:\nMaq %d Job %d: %d\nMaq %d Job %d: %d\n",mach1, job1, machines[mach1].array[job1], mach2,job2,machines[mach2].array[job2]);
 			//printf("makespan: %d\n\n", makespan());
+			
 			tmp = machines[mach1].array[job1];
 			machines[mach1].array[job1] = machines[mach2].array[job2];
 			machines[mach2].array[job2] = tmp;
-			//printf("AFTER:\nMaq %d Job %d: %d\nMaq %d Job %d: %d\n\n",mach1, job1, machines[mach1].array[job1], mach2,job2,machines[mach2].array[job2]);
-			//printf("makespan: %d\n\n", makespan());
-			//return;
-
-			// I'll now check if this solution is better than the best one.
-			// I'll allow movements without makespan time changes just to do the movement
-			if(makespan() > worst) {
-				// That's not a good option, let's rollback
-				tmp = machines[mach1].array[job1];
-				machines[mach1].array[job1] = machines[mach2].array[job2];
-				machines[mach2].array[job2] = tmp;
+			
+			
+			// I'll now check if this solution is better than the best neighbor so far.
+			if(makespan() < worst) {
+				// Ok, that's the best neighbor now. Let's store it details
+				mov = 'c'; //interchange
+				bestMach1 = mach1;
+				bestMach2 = mach2;
+				bestJob1 = job1;
+				bestJob2 = job2;
+				// Just interchange positions, piece of cake.
+				// Update worst value to this neighbor makespan()
+				worst = makespan();
 			}
-
-			// Ok, that was one iteration
-			iteration++;
+			// Rollback to generate another neighbor
+			tmp = machines[mach1].array[job1];
+			machines[mach1].array[job1] = machines[mach2].array[job2];
+			machines[mach2].array[job2] = tmp;
 		}
-		if(debug)
-			printf("\nmakespan final interchange: %d\n", makespan());
-
-		// Reset iteration
-		iteration = 0;
-		// Get new makespan
-		worst = makespan();
-
-		// Ok, now that I've the best Interchange, let's get this solution and make Insertion mods
-		while(iteration < iterations) {
+		else { // insertion
 			// I need two machines, one to retrieve, one to receive. Find them randomly
 			mach1 = getRand(0, totalMachines-1);
 			//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
-			while(machines[mach1].used-1 == 0)
+			while(machines[mach1].used == 0)
 				mach1 = getRand(0, totalMachines-1);
 
 			// Machine2, where the job'll be placed
@@ -228,39 +240,195 @@ void localSearch() {
 
 			// One job from mach1
 			job1 = getRand(0,machines[mach1].used-1);
-
 			// Insert this job in mach2
 			insertArray(&machines[mach2], machines[mach1].array[job1]);
-
+			
 			// Remove this job from mach1
 			removeArray(&machines[mach1], job1);
-
-			// Let's check if this is a good solution (better than the last one)
-			if(makespan() > worst) {
-				// Rollback
-				insertArray(&machines[mach1], machines[mach2].array[machines[mach2].used-1]);
-				removeArray(&machines[mach2], machines[mach2].used-1);
+			
+			// I'll now check if this solution is better than the best neighbor so far.
+			if(makespan() < worst) {
+				
+				// Ok, that's the best neighbor now. Let's store it details
+				mov = 'i'; //insertion
+				bestMach1 = mach1; // One which job1 is removed
+				bestJob1 = job1;
+				bestMach2 = mach2; // One which job1 is reallocated
+				// To make the change, just remove used-1 pos from mach2 and allocate it's value to mach1
+				
+				// Update worst value to this neighbor makespan()
+				worst = makespan();
 			}
-
-			// Ok, that was an iteration
-			iteration++;
+			
+			// Rollback to get another neighbor
+			insertArray(&machines[mach1], machines[mach2].array[machines[mach2].used-1]);
+			removeArray(&machines[mach2], machines[mach2].used-1);
+		
 		}
-		if(debug)
-			printf("\nmakespan final insertion: %d\n", makespan());
+
+		// Ok, after neighbor found, check if it's worse is better than actual makespan() accepting equal values (so we can run around neighborhood)
+		if(worst < makespan()) {
+			// The neighbor is better than actual solution
+			// Make the change
+			
+			
+			if(mov == 'c') {
+				tmp = machines[bestMach1].array[bestJob1];
+				machines[bestMach1].array[bestJob1] = machines[bestMach2].array[bestJob2];
+				machines[bestMach2].array[bestJob2] = tmp;
+				
+			}
+			else { // mov == 'i'
+				insertArray(&machines[mach2], machines[mach1].array[machines[mach1].used-1]);
+				removeArray(&machines[mach1], machines[mach1].used-1);
+			}
+			
+			// resets iteration counter
+			iteration = 0; 
+		}
+		else
+			iteration++;
 	
+		/*
 		// Now let's check if makespan() = worst.
 		if(makespan() == worst)
 			equalRounds++;
 		else
 			equalRounds = 0;
+		*/
+		
 	} // end equalRounds
-	
-	// That's it, localSearch is done
+	printf("makespan after RVND: %d\n", makespan());
+	// That's it, localSearch RVND is done
 	return;
 }
 
-void GA() {
+// Generate Random Solution for GA
+// Just get the initial solution and generates a new one doing n (number of jobs) interchanges and insertions around it
+randomSolution() {
 	//
+}
+// Genetic Algorithm
+// n-ary representation. <3,7,1,2> means job 0 is in machine 3, job 2 is in machine 7...
+void GA() {
+	int t = 0;
+	
+	// Gerando população inicial P(t)
+	
+	// Avaliando P(t)
+	
+	// Enquanto critério de parada  não estiver satisfeito
+	//while {
+		t++;
+		//Gerar P(t) a partir de P(t-1)
+		//Avaliar P(t)
+		//Definir população sobrevivente
+	// }
+}
+/*void randomNeighbor(Array *neighbor) {
+	//Array randomNeighbor[totalMachines];
+	
+	// now we want to copy a to b
+	memcpy(&neighbor, &machines, sizeof randomNeighbor);
+	// Copy machine[] to randomNeighbor
+	//randomNeighbor = machines;
+	return;
+}*/
+
+void VNS() {
+	// Set how many different neighbors we'll get
+	int neighborhoodSize = 0.1*(totalJobs*(totalMachines-1));
+	int stop = 0, k, mach1, mach2,job1,job2,tmp,cmax;
+
+	// Get current cmax
+	cmax = makespan();
+	
+	// Same as localSearch, if 15 makespan() did not change, stop.
+	while(stop < 15) {
+		k = 1;
+		while(k <= neighborhoodSize) {
+			// Generates a random neighbor with a random movement
+			// 0 for interchange, 1 for insertion
+			if(getRand(0,1) == 0) {
+				// Interchange
+				// I need two machines. Find them randomly
+				mach1 = getRand(0, totalMachines-1);
+				//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
+				while(machines[mach1].used == 0)
+					mach1 = getRand(0, totalMachines-1);
+				//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
+				mach2 = getRand(0, totalMachines-1);
+				while(machines[mach2].used == 0) // Not the same machine
+					mach2 = getRand(0, totalMachines-1);
+
+				// In these machines, get a random job
+				job1 = getRand(0,machines[mach1].used-1);
+				job2 = getRand(0,machines[mach2].used-1);
+
+				// Now interchange them
+				tmp = machines[mach1].array[job1];
+				machines[mach1].array[job1] = machines[mach2].array[job2];
+				machines[mach2].array[job2] = tmp;
+				
+				// Do localSearch
+				localSearch();
+				
+				if(makespan() < cmax) {
+					// No rollback, that's a good solution. Update cmax
+					cmax = makespan();
+					k = 0;
+				}
+				else {
+					// Rollback. This isn't a good solution
+					tmp = machines[mach1].array[job1];
+					machines[mach1].array[job1] = machines[mach2].array[job2];
+					machines[mach2].array[job2] = tmp;
+					k++;
+				}
+			}
+			else {
+				// Let's insert
+				// I need two machines, one to retrieve, one to receive. Find them randomly
+				mach1 = getRand(0, totalMachines-1);
+				//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
+				while(machines[mach1].used == 0)
+					mach1 = getRand(0, totalMachines-1);
+
+				// Machine2, where the job'll be placed
+				mach2 = getRand(0, totalMachines-1);
+
+				// One job from mach1
+				job1 = getRand(0,machines[mach1].used-1);
+				// Insert this job in mach2
+				insertArray(&machines[mach2], machines[mach1].array[job1]);
+
+				// Remove this job from mach1
+				removeArray(&machines[mach1], job1);
+
+				// Do localSearch
+				localSearch();
+				
+				if(makespan() < cmax) {
+					// No rollback, that's a good solution. Update cmax
+					cmax = makespan();
+					k = 0;
+				}
+				else {
+					// Rollback. This isn't a good solution
+					insertArray(&machines[mach1], machines[mach2].array[machines[mach2].used-1]);
+					removeArray(&machines[mach2], machines[mach2].used-1);
+					k++;
+				}
+			
+				
+			}
+			// Execute localSearch in this neighbor
+		
+		}
+		stop++;
+	}
+	printf("MAKESPAN VNS: %d\n", makespan());
+	return;
 }
 
 void generateMenu() {
@@ -269,8 +437,8 @@ void generateMenu() {
 	printf("1 - Generates initial solution\n");
 	printf("2 - Local Search\n");
 	printf("3 - Genetic Algorithm (GA)\n");
-	printf("4 - Iterated Greedy\n");
-	printf("5 - VNS\n");
+	printf("4 - VNS\n");
+	printf("5 - Iterated Greedy\n");
 	printf("6 - Exit\n");
 	
 	/*
@@ -295,6 +463,12 @@ void generateMenu() {
 			break;
 		case '3':
 			GA();
+			generateMenu();
+			break;
+		case '4':
+			printf("VNS0\n");
+			
+			VNS();
 			generateMenu();
 			break;
 		// Exits the program

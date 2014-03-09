@@ -1,5 +1,6 @@
 /**
- * Interface of program structs
+ * Interface of program structs.
+ * Also check http://happybearsoftware.com/implementing-a-dynamic-array.html
  */
 // http://stackoverflow.com/questions/3536153/c-dynamically-growing-array
 typedef struct {

@@ -42,6 +42,16 @@ void freeArray(Array *a) {
   a->used = a->size = 0;
 }
 
+void copyArray(Array *from, Array *to) {
+	int i;
+	// Clear before all
+	to->used=0;
+	//printf("from->used: %d\n", from->used);exit(-1);
+	for(i=0;i < from->used;i++) {
+		insertArray(to, from->array[i]);
+	}
+}
+
 typedef struct {
 	Array maquina;
 	Array tempo;

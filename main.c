@@ -19,6 +19,9 @@ int totalJobs, totalMachines;
 Array machines[10]; // Stores the job position, not job value!!
 bool debug = true;
 // Solution struct
+#include "local.h" // localSearch, readFile, initialSolution...
+#include "vns.h"
+#include "ga.h"
 #include "menu.h"
 
 int main(int argc, char** argv) {

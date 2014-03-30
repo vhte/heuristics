@@ -138,6 +138,7 @@ void initialSolution() {
 	return;
 }
 
+// @todo Receber Array e calcular
 int Ci(int machine) {
 	int i=0,sum=0;
 	//printf("machine->used: %d\n",machine->used);

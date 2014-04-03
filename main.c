@@ -11,8 +11,8 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <time.h>
-#include "util.h"
 #include "structs.h"
+#include "util.h"
 // Create the Job list w/ enough machine times. Need to be created here because needs structs.h file and it'll be used in menu.h
 Jobs jobs[1000];
 int totalJobs, totalMachines;

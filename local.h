@@ -58,7 +58,7 @@ void readFile() {
 		for(j=0;j<totalMachines*2;j++) {
 			//printf("Maq %d Tem %d\n", jobs[i-3].job.maquina.array[0], jobs[i-3].job.tempo.array[0]);
 			insertArray(&jobs[i-3].job.maquina, tmpJ[j]);
-			insertArray(&jobs[i-3].job.tempo, tmpJ[j+1]);
+			insertArray(&jobs[i-3].job.tempo, tmpJ[j+1]); // segue a posicao normal, primeiro insert irá maq0, segundo maq1...
 			j++;
 		}
 		

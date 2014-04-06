@@ -8,10 +8,10 @@
 void VNS() {
 	// Set how many different neighbors we'll get
 	int neighborhoodSize = 0.1*(totalJobs*(totalMachines-1));
-	int countNaoTeveMelhora = 0, k, mach1, mach2,job1,job2,tmp,cmax;
+	int countNaoTeveMelhora = 0,i, k, mach1, mach2,job1,job2,tmp,cmax,contadorOctave;
 	bool teveMelhora;
 
-	Array beforeLocalsearch[totalMachines];
+	Array beforeLocalsearch[totalMachines], octaveX, octaveY;
 	
 	// As I can't use memcpy because of pointers, just use a custom function that rebuilds an instance to another
 	for(tmp=0;tmp<totalMachines;tmp++)
@@ -20,6 +20,11 @@ void VNS() {
 	for(tmp=0;tmp<totalMachines;tmp++) {
 		copyArray(&machines[tmp], &beforeLocalsearch[tmp]);	
 	}
+	
+	// Octave (printar a evolucao do AG)
+	initArray(&octaveX, 1); // Stores ASCII values to plot AG results
+	initArray(&octaveY, 1); // Stores ASCII values to plot AG results
+	contadorOctave = 0;
 	
 	//memcpy(&beforeLocalsearch, &machines, sizeof machines);
 	// Same as localSearch, if 15 makespan() did not change, countNaoTeveMelhora.
@@ -344,6 +349,9 @@ void VNS() {
 			
 			k++;
 		}
+		// After movement, insert result in report
+		insertArray(&octaveX, contadorOctave++);
+		insertArray(&octaveY, makespan());
 		
 		if(teveMelhora)
 			countNaoTeveMelhora = 0;
@@ -355,5 +363,10 @@ void VNS() {
 		printf("===== AFTER ALL NEIGHBORHOOD countNaoTeveMelhora: %d  VNS k = %d: %d\n", countNaoTeveMelhora, k, makespan());
 	}
 	printf("VNS: %d\n", makespan());
+	// Armazena em arquivo resultado do octave
+	report('V', &octaveX, &octaveY, totalJobs, totalMachines);
+	
+	
+	
 	return;
 }

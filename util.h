@@ -9,6 +9,9 @@
 // I need this to be global, so srand() can generate different number each iteration because we'll always have a different nRand
 unsigned int getRand_n = 0;
 int getRand(int min_num, int max_num) {
+	if(min_num == max_num)
+		return min_num;
+	
 	int result=0,low_num=0,hi_num=0;
 	if(min_num<max_num) {
 		low_num=min_num;

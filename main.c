@@ -3,6 +3,11 @@
  * Author: victor
  *
  * Created on January 14, 2014, 10:23 AM
+ * 
+ * gcc -lm main.c
+ * -lm to link math lib
+ * 
+ * octave teste.mat (with pause before end)
  */
 
 #include <stdio.h>
@@ -11,6 +16,7 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <time.h>
+#include <math.h>
 #include "structs.h"
 #include "util.h"
 // Create the Job list w/ enough machine times. Need to be created here because needs structs.h file and it'll be used in menu.h
@@ -20,6 +26,7 @@ Array machines[10]; // Stores the job position, not job value!!
 bool debug = true;
 // Solution struct
 #include "local.h" // localSearch, readFile, initialSolution...
+#include "octave.h" // report
 #include "vns.h"
 #include "ga.h"
 #include "menu.h"

@@ -17,7 +17,7 @@ void readFile() {
 	//Jobs jobs[1000];
 
 	// Get the file and read it
-	file = fopen("111.txt", "r"); // open for reading
+	file = fopen("1011.txt", "r"); // open for reading
 	
 	while(fgets(line, sizeof line,file) != NULL) {
 		i++;

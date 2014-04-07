@@ -56,6 +56,9 @@ void report(char algorithm, Array *octaveX, Array *octaveY, int jobs, int maquin
 	strcpy(x,"grid on;");
 	fwrite(x, sizeof(char), strlen(x), fp);
 	memset(x,0,sizeof(x));
+	strcpy(x,"saveas (1, \"figure1.png\");");
+	fwrite(x, sizeof(char), strlen(x), fp);
+	memset(x,0,sizeof(x));
 	strcpy(x,"pause;\0");
 	fwrite(x, sizeof(char), strlen(x), fp);
 	

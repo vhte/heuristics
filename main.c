@@ -23,7 +23,7 @@
 Jobs jobs[1000];
 int totalJobs, totalMachines;
 Array machines[10]; // Stores the job position, not job value!!
-bool debug = true;
+bool debug = false;
 // Solution struct
 #include "local.h" // localSearch, readFile, initialSolution...
 #include "octave.h" // report

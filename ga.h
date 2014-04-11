@@ -11,12 +11,12 @@
 // Gene = Job
 // @todo Melhorar a verificacao se filhos foram gerados pelo cruzamento na hora de mutar
 void GA() {
-	int t, worst, neighborhoodSize, pCrossover, pMutacao,tmp,tmp2;
+	int t, worst, neighborhoodSize, pCrossover, pMutacao,tmp,tmp2,maqMutacaoFilho1,maqMutacaoFilho2;
 	float pGenesAfetados,pTrocaGenes,pAtual;
 	int m1, m2, menor, maior, i,j,k,maqCorrente,halfJobs,job1,job2,ciPais,ciFilhos,qte1,qte2;
 	int roleta[2]; // 0 - Pais 1 - Filhos (talvez mutados)
 	char menorC;
-	bool haFilhos;
+	bool haFilhos, houveMutacao;
 	
 	Array maquinaFilho1, maquinaFilho2, listaTrocarFilho1, listaTrocarFilho2, listaMutarFilho1, listaMutarFilho2, octaveX, octaveY;
 	
@@ -30,15 +30,15 @@ void GA() {
 	pCrossover = 80; // 80% (80)
 	
 	// Probabilidade pMutacao
-	pMutacao = 4; // Aplicar radioatividade?
+	pMutacao = 7; // Aplicar radioatividade?
 	
 	// Porcentagem de cada cromossomo de genes a serem mutados (entre 2 genes, pegará o de menor qte de cromossomos)
 	// Trabalha com CROSSOVER
-	pGenesAfetados = 10;
+	pGenesAfetados = 1;
 	
 	// Porcentagem de genes do menor cromossomo entre 2 cromossomos que irá fazer interchange com genes 
 	// TRABALHA COM MUTACAO
-	pTrocaGenes = 10;
+	pTrocaGenes = 1;
 	
 	// Gerando população inicial P(t) - Já é machines[]
 	// Cada cromossomo {s1, s2, s3, s3...} será uma maquina, e é essa populacao que muda, pois vou selecionar 2 maquinas e trocar os jobs e avaliar os sobreviventes e substituir.
@@ -57,11 +57,12 @@ void GA() {
 	initArray(&octaveY, 1); // Stores ASCII values to plot AG results
 	
 	// Enquanto critério de parada  não estiver satisfeito
-	while(t < 1000) {
+	while(t < 10000) {
 		insertArray(&octaveX, t);
 
 		// Tell no second generation population exists
 		haFilhos = false;
+		houveMutacao = false;
 	
 		if(debug)
 			printf("\n\nIteração %d\n", t);
@@ -110,13 +111,13 @@ void GA() {
 			system("read -p \"Aperte qualquer tecla para prosseguir...\"");
 		}
 		
-		// Dois filhos com tamanho 0, ou seja, nenhum filho gerado até agora (caso exista apenas mutação)
-		//initArray(&maquinaFilho1, 1);
-		//initArray(&maquinaFilho2, 1);
+		// Dois filhos com tamanho 1, ou seja, nenhum filho gerado até agora (caso exista apenas mutação).
+		// Cria-os apenas para não dar core dumped caso não entre no crossover (e mutação). Quem controla se os filhos existem ou não é haFilhos
+		initArray(&maquinaFilho1, 1);
+		initArray(&maquinaFilho2, 1);
 
 		// Cruzamento (Crossover) (80%)
 		if(getRand(0,100) < pCrossover) {
-			
 			haFilhos = true;
 			// Com os dois pais setados, iniciar 2 filhos, cada qual com o tamanho 1 (insertArray() tratará de aumentar o tamanho deles automaticamente a  medida do necessário)
 			initArray(&maquinaFilho1, 1);
@@ -155,19 +156,38 @@ void GA() {
 			
 			// Referencia para pGenesAfetados sera baseado em maquinaFilho1
 			// listaTrocarFilho1 e 2 tem indices de machine1 e 2
+			tmp2 = 0;
 			for(i=0;i<pAtual;i++) {
 				j = getRand(0,maquinaFilho1.used-1);
 				while(inArray(j, &listaTrocarFilho1))
 					j = getRand(0,maquinaFilho1.used-1);
-				insertArray(&listaTrocarFilho1, j);
+				
+				// Esse job é bom para a troca?
+				if((jobs[maquinaFilho1.array[j]].job.tempo.array[m1] > jobs[maquinaFilho1.array[j]].job.tempo.array[m2]) || tmp2 > pAtual)
+					// É bom, insere
+					insertArray(&listaTrocarFilho1, j);
+				else {
+					//printf("i: %d - O job %d na maquinaFilho1 tem tempo em m1 de %d e m2 de %d. Nao trocou. tmp2: %d\n", i,maquinaFilho1.array[j], jobs[maquinaFilho1.array[j]].job.tempo.array[m1], jobs[maquinaFilho1.array[j]].job.tempo.array[m2],tmp2);
+					tmp2++;
+					i--;
+				}
 			}
 
-
+			tmp2 = 0;
 			for(i=0;i<pAtual;i++) {
 				j = getRand(0,maquinaFilho2.used-1);
 				while(inArray(j, &listaTrocarFilho2))
 					j = getRand(0,maquinaFilho2.used-1);
-				insertArray(&listaTrocarFilho2, j);
+				
+				// Esse job é bom para a troca?
+				if((jobs[maquinaFilho2.array[j]].job.tempo.array[m2] > jobs[maquinaFilho2.array[j]].job.tempo.array[m1]) || tmp2 > pAtual)
+					// É bom, insere
+					insertArray(&listaTrocarFilho2, j);
+				else {
+					//printf("i: %d - O job %d na maquinaFilho2 tem tempo em m2 de %d e m1 de %d. Nao trocou. tmp2: %d\n", i, maquinaFilho2.array[j], jobs[maquinaFilho2.array[j]].job.tempo.array[m2], jobs[maquinaFilho2.array[j]].job.tempo.array[m1],tmp2);
+					tmp2++;
+					i--;
+				}
 			}
 			
 			if(debug) {
@@ -193,9 +213,21 @@ void GA() {
 				printf("\n\nFez o crossover entre maquinaFilho1 e maquinaFilho2\nmaquinaFilho1: ");
 				for(i=0;i<maquinaFilho1.used;i++)
 					printf("%d ", maquinaFilho1.array[i]);
+				printf("\nCi(%d): ", m1);
+				ciFilhos = 0;
+				for(i=0;i<maquinaFilho1.used;i++) {
+					ciFilhos += jobs[maquinaFilho1.array[i]].job.tempo.array[m1];
+				}
+				printf("%d", ciFilhos);
 				printf("\nmaquinaFilho2: ", m2);
 				for(i=0;i<maquinaFilho2.used;i++)
 					printf("%d ", maquinaFilho2.array[i]);
+				printf("\nCi(%d): ", m2);
+				ciFilhos = 0;
+				for(i=0;i<maquinaFilho2.used;i++) {
+					ciFilhos += jobs[maquinaFilho2.array[i]].job.tempo.array[m2];
+				}
+				printf("%d", ciFilhos);
 				printf("\n");
 				system("read -p \"Aperte qualquer tecla para prosseguir...\"");
 			}
@@ -215,6 +247,7 @@ void GA() {
 		
 		// Mutação - Remove/Insert
 		if(getRand(0,100) < pMutacao && haFilhos) {
+			houveMutacao = true;
 			
 			// Muta os filhos com remove/insert aleatório de acordo com pTrocaGenes (cromossomos mutados: 1 à pTrocaGenes%). Pelo menos 1 cromossomo é mutado (duh!)
 			initArray(&listaMutarFilho1, 1);  
@@ -274,9 +307,14 @@ void GA() {
 				}
 				//removeArray(&maquinaFilho1, listaMutarFilho1.array[i]);
 				
-				insertArray(&maquinaFilho2, tmp);
+				//insertArray(&maquinaFilho2, tmp);
+				
 			}
-			/*
+			// Vai inserir numa maquina que nao seja m1 nem m2. Isso só vai ser executado se filhos melhor que pais la na seleção de individuos aptos
+			maqMutacaoFilho1 = getRand(0,totalMachines-1);
+			while(maqMutacaoFilho1 == m1 || maqMutacaoFilho1 == m2)
+				maqMutacaoFilho1 = getRand(0,totalMachines-1);
+			
 			for(i=0;i<listaMutarFilho2.used;i++) {
 				// Retirar de maquinaFilho2 e adicionar em maquinaFilho1
 				tmp = listaMutarFilho2.array[i];
@@ -288,15 +326,32 @@ void GA() {
 				}
 				//removeArray(&maquinaFilho2, listaMutarFilho2.array[i]);
 				
-				insertArray(&maquinaFilho1, tmp);
-			}*/
+				//insertArray(&maquinaFilho1, tmp);
+				
+			}
+			maqMutacaoFilho2 = getRand(0,totalMachines-1);
+			while(maqMutacaoFilho2 == m1 || maqMutacaoFilho2 == m2 || maqMutacaoFilho2 == maqMutacaoFilho1)
+				maqMutacaoFilho2 = getRand(0,totalMachines-1);
+			
 			if(debug) {
 				printf("\n\nE assim ficou apos a mutacao\nmaquinaFilho1: ");
 				for(i=0;i<maquinaFilho1.used;i++)
 					printf("%d ", maquinaFilho1.array[i]);
+				printf("\nCi(%d): ", m1);
+				ciFilhos = 0;
+				for(i=0;i<maquinaFilho1.used;i++) {
+					ciFilhos += jobs[maquinaFilho1.array[i]].job.tempo.array[m1];
+				}
+				printf("%d", ciFilhos);
 				printf("\nmaquinaFilho2: ");
 				for(i=0;i<maquinaFilho2.used;i++)
 					printf("%d ", maquinaFilho2.array[i]);
+				printf("\nCi(%d): ", m2);
+				ciFilhos = 0;
+				for(i=0;i<maquinaFilho2.used;i++) {
+					ciFilhos += jobs[maquinaFilho2.array[i]].job.tempo.array[m2];
+				}
+				printf("%d", ciFilhos);
 				printf("\n");
 				system("read -p \"Aperte qualquer tecla para prosseguir...\"");
 			}
@@ -307,7 +362,7 @@ void GA() {
 		// 3 Avaliações (com os pais [nao mutados talvez com os mutados] e com os filhos [talvez mutados])
 		// Feita da seguinte forma: Soma dos tempos das duas máquinas. Ci(pai1)+Ci(pai2), Ci(filho1)+Ci(filho2)
 		//ciPais = Ci(m1) + Ci(m2);
-		ciPais = Ci(m1);
+		ciPais = Ci(m1); // maquina mais cara
 
 		// Se tem filho, soma tambem
 		if(haFilhos) {
@@ -318,11 +373,14 @@ void GA() {
 			for(i=0;i<maquinaFilho1.used;i++) {
 				ciFilhos += jobs[maquinaFilho1.array[i]].job.tempo.array[m1];
 			}
-/*
+			tmp = ciFilhos;
+			ciFilhos = 0;
 			for(i=0;i<maquinaFilho2.used;i++) {
 				ciFilhos += jobs[maquinaFilho2.array[i]].job.tempo.array[m2];
 			}
-*/
+			if(ciFilhos < tmp)
+				ciFilhos = tmp; // Máquina mais cara dos filhos
+
 
 		}
 			
@@ -347,14 +405,17 @@ void GA() {
 			
 			// Roubando na roleta (forçando resultados)
 			/*if(menorC == 'p') {
-				roleta[0] = 100;
-				roleta[1] = 0;
-			}
-			else {
 				roleta[0] = 0;
 				roleta[1] = 100;
+			}
+			else {
+				roleta[0] = 100;
+				roleta[1] = 0;
 			}*/
-			
+			if(debug) {
+				printf("\n\nRoleta\nChance de aceitar os pais: %d%\nChance de aceitar os filhos: %d%\nValor da roleta: %d\n", roleta[0], roleta[1], tmp);
+				system("read -p \"Aperte qualquer tecla para prosseguir...\"");
+			}
 			if(roleta[0] > roleta[1]) { // A chance de pais ser escolhido é maior
 				if(tmp < roleta[1]) { // se a roleta for menor que o menor (filhos), trocar por filhos.
 					//freeArray(&machines[m1]);
@@ -366,6 +427,15 @@ void GA() {
 						insertArray(&machines[m1], maquinaFilho1.array[i]);
 					for(i=0;i<maquinaFilho2.used;i++)
 						insertArray(&machines[m2], maquinaFilho2.array[i]);
+					
+					// Se houve mutacao, realizar a insercao nas maquinas
+					if(houveMutacao) {
+						for(i=0;i<listaMutarFilho1.used;i++)
+							insertArray(&machines[maqMutacaoFilho1], listaMutarFilho1.array[i]);
+						
+						for(i=0;i<listaMutarFilho2.used;i++)
+							insertArray(&machines[maqMutacaoFilho2], listaMutarFilho2.array[i]);
+					}
 				}
 			}
 			else { // pais <= filhos
@@ -379,6 +449,15 @@ void GA() {
 						insertArray(&machines[m1], maquinaFilho1.array[i]);
 					for(i=0;i<maquinaFilho2.used;i++)
 						insertArray(&machines[m2], maquinaFilho2.array[i]);
+					
+					// Se houve mutacao, realizar a insercao nas maquinas
+					if(houveMutacao) {
+						for(i=0;i<listaMutarFilho1.used;i++)
+							insertArray(&machines[maqMutacaoFilho1], listaMutarFilho1.array[i]);
+						
+						for(i=0;i<listaMutarFilho2.used;i++)
+							insertArray(&machines[maqMutacaoFilho2], listaMutarFilho2.array[i]);
+					}
 				}
 			}
 

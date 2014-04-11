@@ -5,6 +5,7 @@
  * Created on April 6, 2014, 3:37 PM
  * 
  * Report charts
+ * solucaoInicial = global
  */
 void report(char algorithm, Array *octaveX, Array *octaveY, int jobs, int maquinas) {
 	int i;
@@ -39,7 +40,7 @@ void report(char algorithm, Array *octaveX, Array *octaveY, int jobs, int maquin
 	strcpy(x,"plot(x,y);\n");
 	fwrite(x, sizeof(char), strlen(x),fp);
 	memset(x,0,sizeof(x));
-	sprintf(z, "title(\"%s\\nConfiguracao: %d maquinas / %d tarefas\");", (algorithm == 'G' ? "Genetic Algorithm" : "Variable Neighborhood Search"), maquinas, jobs);
+	sprintf(z, "title(\"%s\\nConfiguracao: %d maquinas / %d tarefas. Solucao inicial: %s\");", (algorithm == 'G' ? "Algoritmo Genetico" : "Variable Neighborhood Search (VNS)"), maquinas, jobs, (solucaoInicial == 'G' ?  "Gulosa" : "Aleatoria"));
 	//strcpy(x,"title(\"Algoritmo Genetico\");");
 	fwrite(z, sizeof(char), strlen(z),fp);
 	memset(x,0,sizeof(x));

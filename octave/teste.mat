@@ -1,0 +1,16 @@
+#! /bin/octave -qf
+% create your dataset (exampledata) 
+x = (-1:0.1:1); 
+y = sin(x); 
+data = zeros(length(x),2); 
+data(:,1) = x; 
+data(:,2) = y;
+
+% save data to file (your textfile) 
+save('-ascii','data2.txt','data'); 
+
+%load textfile 
+data2 = load('data2.txt'); 
+
+%plot data 
+plot(data2(:,1),data2(:,2))

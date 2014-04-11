@@ -97,28 +97,45 @@ void readFile() {
 
 // Initial solution = For each job, gets the shortest time and put it in the machine attached to this time
 // @todo free(&jobs). We don't need it anymore
-void initialSolution() {
-	int i=0,j,menor,melhorMaq;
+void initialSolution(char tipo) {
+	if(tipo != 'R' && tipo != 'G') {
+		printf("Erro ao gerar solução inicial. OpçÕes válidas: (R)andom e (G)reedy\n");
+		return;
+	}
+	
+	int i=0,j,tmp,menor,melhorMaq;
 	// Initialize number of machines
 	for(;i<totalMachines;i++)
 		initArray(&machines[i], totalJobs);
 	
 	// For each job...
 	for(i=0;i<totalJobs;i++) {
-		// ... allocate the shortest time to selected machine
-		menor = INT_MAX;
-		// Find best machine to put this job i
-		for(j=0;j<jobs[i].job.tempo.used;j++) {
-			if(jobs[i].job.tempo.array[j] < menor) {
-				menor = jobs[i].job.tempo.array[j];
-				melhorMaq = jobs[i].job.maquina.array[j];
+		
+		if(tipo == 'G') {
+			solucaoInicial = 'G';
+			// ... allocate the shortest time to selected machine
+			menor = INT_MAX;
+			// Find best machine to put this job i
+			for(j=0;j<jobs[i].job.tempo.used;j++) {
+				if(jobs[i].job.tempo.array[j] < menor) {
+					menor = jobs[i].job.tempo.array[j];
+					melhorMaq = jobs[i].job.maquina.array[j];
+				}
 			}
+			// allocate job i to its best machine...
+			insertArray(&machines[melhorMaq], i);
 		}
-		// allocate job i to its best machine...
-		insertArray(&machines[melhorMaq], i);
+		else if(tipo == 'R') {
+			solucaoInicial = 'R';
+			insertArray(&machines[getRand(0,totalMachines-1)], i);
+		}
 	}
+
+	if(tipo == 'G')
+		printf("Solucao Inicial Gulosa gerada.\n\n");
+	else if(tipo == 'R')
+		printf("Solucao Inicial Randomica gerada.\n\n");
 	
-	printf("Solucao Inicial Gulosa gerada.\n\n");
 	// Just show the initial solution
 	for(i=0;i<totalMachines;i++) {
 		printf("Maquina %d: ", i);

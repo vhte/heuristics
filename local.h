@@ -9,17 +9,38 @@
 void readFile() {
 	// Declares file pointer
 	FILE *file;
-	char line[180];
+	char line[1024];
 	int i = 0;
 	
-	int j = 0, k = 0, tmpJ[20]; // count for totalJobs
+	int j = 0, k = 0, tmpJ[100]; // count for totalJobs
 	// Create the Job list w/ enough machine times
 	//Jobs jobs[1000];
 
 	// Get the file and read it
-	file = fopen("1011.txt", "r"); // open for reading
+	// open for reading
+	
+	// Random
+	//file = fopen("instances/instancias1a100/111.txt", "r"); // 10x100
+	//file = fopen("instances/instancias1a100/1011.txt", "r"); // 10x1000
+	//file = fopen("instances/instancias1a100/541.txt", "r"); // 40x500
+	//file = fopen("instances/instancias1a100/1060.txt", "r"); // 50x1000
+	
+	// Job-like
+	//file = fopen("instances/JobsCorre/111.txt", "r"); // 10x100
+	//file = fopen("instances/JobsCorre/1011.txt", "r"); // 10x1000
+	//file = fopen("instances/JobsCorre/541.txt", "r"); // 40x500
+	//file = fopen("instances/JobsCorre/1060.txt", "r"); // 50x1000
+	
+	// Machine-like
+	//file = fopen("instances/MaqCorre/111.txt", "r"); // 10x100
+	//file = fopen("instances/MaqCorre/1011.txt", "r"); // 10x1000
+	//file = fopen("instances/MaqCorre/541.txt", "r"); // 40x500
+	file = fopen("instances/MaqCorre/1060.txt", "r"); // 50x1000
 	
 	while(fgets(line, sizeof line,file) != NULL) {
+		//printf("linha: %s\n", line);
+		//system("read -p \"Aperte qualquer tecla para prosseguir...\"");
+		
 		i++;
 		// 1st line - nr of jobs<space>number of machines<space>1
 		if(i == 1) {
@@ -49,9 +70,39 @@ void readFile() {
 
 		if(debug)
 			printf("\n\nJOB %d\n\n", i-3);
-		sscanf(line,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+		
+		switch(totalMachines) {
+			case 10:
+				sscanf(line,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
 				&tmpJ[0], &tmpJ[1], &tmpJ[2], &tmpJ[3], &tmpJ[4], &tmpJ[5], &tmpJ[6], &tmpJ[7], &tmpJ[8], &tmpJ[9],
 				&tmpJ[10], &tmpJ[11], &tmpJ[12], &tmpJ[13], &tmpJ[14], &tmpJ[15], &tmpJ[16], &tmpJ[17], &tmpJ[18], &tmpJ[19]);
+			break;
+			case 40:
+				sscanf(line,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+				&tmpJ[0], &tmpJ[1], &tmpJ[2], &tmpJ[3], &tmpJ[4], &tmpJ[5], &tmpJ[6], &tmpJ[7], &tmpJ[8], &tmpJ[9],
+				&tmpJ[10], &tmpJ[11], &tmpJ[12], &tmpJ[13], &tmpJ[14], &tmpJ[15], &tmpJ[16], &tmpJ[17], &tmpJ[18], &tmpJ[19],
+				&tmpJ[20], &tmpJ[21], &tmpJ[22], &tmpJ[23], &tmpJ[24], &tmpJ[25], &tmpJ[26], &tmpJ[27], &tmpJ[28], &tmpJ[29],
+				&tmpJ[30], &tmpJ[31], &tmpJ[32], &tmpJ[33], &tmpJ[34], &tmpJ[35], &tmpJ[36], &tmpJ[37], &tmpJ[38], &tmpJ[39],
+				&tmpJ[40], &tmpJ[41], &tmpJ[42], &tmpJ[43], &tmpJ[44], &tmpJ[45], &tmpJ[46], &tmpJ[47], &tmpJ[48], &tmpJ[49],
+				&tmpJ[50], &tmpJ[51], &tmpJ[52], &tmpJ[53], &tmpJ[54], &tmpJ[55], &tmpJ[56], &tmpJ[57], &tmpJ[58], &tmpJ[59],
+				&tmpJ[60], &tmpJ[61], &tmpJ[62], &tmpJ[63], &tmpJ[64], &tmpJ[65], &tmpJ[66], &tmpJ[67], &tmpJ[68], &tmpJ[69],
+				&tmpJ[70], &tmpJ[71], &tmpJ[72], &tmpJ[73], &tmpJ[74], &tmpJ[75], &tmpJ[76], &tmpJ[77], &tmpJ[78], &tmpJ[79]);
+			break;
+			case 50:
+				sscanf(line,"%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d",
+				&tmpJ[0], &tmpJ[1], &tmpJ[2], &tmpJ[3], &tmpJ[4], &tmpJ[5], &tmpJ[6], &tmpJ[7], &tmpJ[8], &tmpJ[9],
+				&tmpJ[10], &tmpJ[11], &tmpJ[12], &tmpJ[13], &tmpJ[14], &tmpJ[15], &tmpJ[16], &tmpJ[17], &tmpJ[18], &tmpJ[19],
+				&tmpJ[20], &tmpJ[21], &tmpJ[22], &tmpJ[23], &tmpJ[24], &tmpJ[25], &tmpJ[26], &tmpJ[27], &tmpJ[28], &tmpJ[29],
+				&tmpJ[30], &tmpJ[31], &tmpJ[32], &tmpJ[33], &tmpJ[34], &tmpJ[35], &tmpJ[36], &tmpJ[37], &tmpJ[38], &tmpJ[39],
+				&tmpJ[40], &tmpJ[41], &tmpJ[42], &tmpJ[43], &tmpJ[44], &tmpJ[45], &tmpJ[46], &tmpJ[47], &tmpJ[48], &tmpJ[49],
+				&tmpJ[50], &tmpJ[51], &tmpJ[52], &tmpJ[53], &tmpJ[54], &tmpJ[55], &tmpJ[56], &tmpJ[57], &tmpJ[58], &tmpJ[59],
+				&tmpJ[60], &tmpJ[61], &tmpJ[62], &tmpJ[63], &tmpJ[64], &tmpJ[65], &tmpJ[66], &tmpJ[67], &tmpJ[68], &tmpJ[69],
+				&tmpJ[70], &tmpJ[71], &tmpJ[72], &tmpJ[73], &tmpJ[74], &tmpJ[75], &tmpJ[76], &tmpJ[77], &tmpJ[78], &tmpJ[79],
+				&tmpJ[80], &tmpJ[81], &tmpJ[82], &tmpJ[83], &tmpJ[84], &tmpJ[85], &tmpJ[86], &tmpJ[87], &tmpJ[88], &tmpJ[89],
+				&tmpJ[90], &tmpJ[91], &tmpJ[92], &tmpJ[93], &tmpJ[94], &tmpJ[95], &tmpJ[96], &tmpJ[97], &tmpJ[98], &tmpJ[99]);
+			break;
+		}
+		printf("i=%d\n", i);
 		k = 0;
 
 		// Adding the relationship MACHINE->TIME to this job
@@ -182,12 +233,11 @@ int makespan() {
 	return worstTime;
 }
 
-// RVND
+// RVND - Because the problem is too random (good job in a machine, but another one no)
 // Uses insertion and interchange movements and tries to find best neighbor.
 // Moves: Interchange and Insertion 1x
-// Stop criteria: 15 moves without get better (lesser) Cmax
-// Neighborhood size: 0.1*(n*(m-1))
-// RNVD?
+// Stop criteria: vizinhanca moves without get better (lesser) Cmax
+// Neighborhood size: 0.1*(n*(m-1)) - all machines except his own machine
 // @todo If no parameter is passed, uses global (the answer to the problem)
 void localSearch() {
 	int iteration = 0, vizinhanca, mach1,mach2,job1,job2,tmp,worst,bestMach1,bestMach2,bestJob1,bestJob2,k,j;

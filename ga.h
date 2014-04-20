@@ -1,15 +1,13 @@
 /* 
- * VERIFICAR SE ESTA REALMENTE TIRANDO DE MAQUINAFILHO1 E MAQUINAFILHO2 E FAZENDO A MUTACAO CORRETAMENTE
  * File:   ga.h
  * Author: victor
  *
  * Created on March 25, 2014, 8:00 PM
  */
 // Genetic Algorithm
-// Possible representation: n-ary. <3,7,1,2> means job 0 is in machine 3, job 2 is in machine 7...
-// Cromossomo = Maquina
+// Another possible representation: n-ary. <3,7,1,2> means job 0 is in machine 3, job 2 is in machine 7...
+// Actual representation: chromosome = machine AND gene = job
 // Gene = Job
-// @todo Melhorar a verificacao se filhos foram gerados pelo cruzamento na hora de mutar
 void GA() {
 	int t, worst, neighborhoodSize, pCrossover, pMutacao,tmp,tmp2,maqMutacaoFilho1,maqMutacaoFilho2;
 	float pGenesAfetados,pTrocaGenes,pAtual;

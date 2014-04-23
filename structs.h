@@ -20,12 +20,10 @@ void insertArray(Array *a, int element) {
     a->size *= 2;
     a->array = (int *)realloc(a->array, a->size * sizeof(int));
   }
-  //printf("***Colocando na posicao %d o valor %d. O tamanho usado e: %d, o tamanho total e: %zd***\n", a->used, element, a->used, a->size);
   a->array[a->used++] = element;
 }
 
 void removeArray(Array *a, int position) {
-	// n  = n+1
 	int i;
 	for(i = position;i < a->used;i++) {
 		// exception for the last i
@@ -46,7 +44,7 @@ void copyArray(Array *from, Array *to) {
 	int i;
 	// Clear before all
 	to->used=0;
-	//printf("from->used: %d\n", from->used);exit(-1);
+	
 	for(i=0;i < from->used;i++) {
 		insertArray(to, from->array[i]);
 	}
@@ -60,11 +58,3 @@ typedef struct {
 typedef struct {
 	Job job;
 } Jobs;
-
-// Solution
-/*typedef struct {
-	Array jobs; // Each job has a time 
-} Machine;*/
-typedef struct {
-	Array jobs;
-} Machines;

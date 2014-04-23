@@ -27,7 +27,7 @@ void readFile() {
 	
 	// Job-like
 	//file = fopen("instances/JobsCorre/111.txt", "r"); // 10x100
-	//file = fopen("instances/JobsCorre/1011.txt", "r"); // 10x1000
+	file = fopen("instances/JobsCorre/1011.txt", "r"); // 10x1000
 	//file = fopen("instances/JobsCorre/541.txt", "r"); // 40x500
 	//file = fopen("instances/JobsCorre/1060.txt", "r"); // 50x1000
 	
@@ -35,7 +35,7 @@ void readFile() {
 	//file = fopen("instances/MaqCorre/111.txt", "r"); // 10x100
 	//file = fopen("instances/MaqCorre/1011.txt", "r"); // 10x1000
 	//file = fopen("instances/MaqCorre/541.txt", "r"); // 40x500
-	file = fopen("instances/MaqCorre/1060.txt", "r"); // 50x1000
+	//file = fopen("instances/MaqCorre/1060.txt", "r"); // 50x1000
 	
 	while(fgets(line, sizeof line,file) != NULL) {
 		//printf("linha: %s\n", line);
@@ -202,6 +202,7 @@ void initialSolution(char tipo) {
 	
 	printf("\nGEROU SOLUCAO INICIAL\n");
 	printf("Makespan: %d\n", makespan());
+	printf("Machine who holds Cmax: %d\n", getCmaxMachine());
 	
 	return;
 }
@@ -214,6 +215,19 @@ int Ci(int machine) {
 		sum += jobs[machines[machine].array[i]].job.tempo.array[machine];
 	
 	return sum;
+}
+
+int getCmaxMachine() {
+	int Cmax = 0, ci, worstMachine, i;
+	for(i=0;i < totalMachines;i++) {
+		ci = Ci(i);
+		if(ci > Cmax) {
+			Cmax = ci;
+			worstMachine = i;
+		}
+	}
+	
+	return worstMachine;
 }
 
 // How much makespan C(max) is?

@@ -6,6 +6,7 @@
  */
 
 
+
 void VNS() {
 	// Set how many different neighbors we'll get
 	int neighborhoodSize = 0.1*(totalJobs*(totalMachines-1));
@@ -89,7 +90,7 @@ void VNS() {
 				mach1 = getCmaxMachine();
 
 				// Machine2, where the job'll be placed
-				mach2 = getRand(0, totalMachines-1);
+				mach2 = getNotACmaxMachine(); //getRand(0, totalMachines-1);
 
 				// One job from mach1
 				job1 = getRand(0,machines[mach1].used-1);
@@ -191,7 +192,7 @@ void VNS() {
 				// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
 				mach1 = getCmaxMachine();
 				// Machine2, where the job'll be placed
-				mach2 = getRand(0, totalMachines-1);
+				mach2 = getNotACmaxMachine(); //getRand(0, totalMachines-1);
 
 				// One job from mach1
 				job1 = getRand(0,machines[mach1].used-1);
@@ -205,7 +206,7 @@ void VNS() {
 				mach1 = getCmaxMachine();
 
 				// Machine2, where the job'll be placed
-				mach2 = getRand(0, totalMachines-1);
+				mach2 = getNotACmaxMachine();//getRand(0, totalMachines-1);
 
 				// One job from mach1
 				job1 = getRand(0,machines[mach1].used-1);
@@ -263,7 +264,7 @@ void VNS() {
 				mach1 = getCmaxMachine();
 
 				// Machine2, where the job'll be placed
-				mach2 = getRand(0, totalMachines-1);
+				mach2 = getNotACmaxMachine();//getRand(0, totalMachines-1);
 
 				// One job from mach1
 				job1 = getRand(0,machines[mach1].used-1);
@@ -339,7 +340,7 @@ void VNS() {
 				mach1 = getCmaxMachine();
 
 				// Machine2, where the job'll be placed
-				mach2 = getRand(0, totalMachines-1);
+				mach2 = getNotACmaxMachine();//getRand(0, totalMachines-1);
 
 				// One job from mach1
 				job1 = getRand(0,machines[mach1].used-1);
@@ -353,7 +354,7 @@ void VNS() {
 				mach1 = getCmaxMachine();
 
 				// Machine2, where the job'll be placed
-				mach2 = getRand(0, totalMachines-1);
+				mach2 = getNotACmaxMachine();//getRand(0, totalMachines-1);
 
 				// One job from mach1
 				job1 = getRand(0,machines[mach1].used-1);

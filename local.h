@@ -26,8 +26,8 @@ void readFile() {
 	//file = fopen("instances/instancias1a100/1060.txt", "r"); // 50x1000
 	
 	// Job-like
-	//file = fopen("instances/JobsCorre/111.txt", "r"); // 10x100
-	file = fopen("instances/JobsCorre/1011.txt", "r"); // 10x1000
+	file = fopen("instances/JobsCorre/111.txt", "r"); // 10x100
+	//file = fopen("instances/JobsCorre/1011.txt", "r"); // 10x1000
 	//file = fopen("instances/JobsCorre/541.txt", "r"); // 40x500
 	//file = fopen("instances/JobsCorre/1060.txt", "r"); // 50x1000
 	
@@ -218,15 +218,82 @@ int Ci(int machine) {
 }
 
 int getCmaxMachine() {
-	int Cmax = 0, ci, worstMachine, i;
+	int Cmax = 0, ci, worstMachine, i,cWorstMachines = 0;
+	int worstMachines[totalMachines];
+	// Hint: Maybe there's two machines holding Cmax... after too many iterations, this could happen
 	for(i=0;i < totalMachines;i++) {
 		ci = Ci(i);
+		// Ok, that's the worse machine
 		if(ci > Cmax) {
 			Cmax = ci;
-			worstMachine = i;
+			// Resets worstMachines counter
+			cWorstMachines = 0;
+			// Reset worstMachines and add this machine to the array
+			memset(worstMachines, 0, sizeof(worstMachines));
+			worstMachines[cWorstMachines] = i;
+		}
+		// Check if we've another machine who also holds Cmax
+		else if(ci == Cmax) {
+			cWorstMachines++;
+			worstMachines[cWorstMachines] = i;
 		}
 	}
 	
+	// Ok, now if I have worstMachines cWorstMachines > 0 I'll randomly select one of this elements (the machines who have the worst time Cmax)
+	if(cWorstMachines != 0) {
+		worstMachine = worstMachines[getRand(0,cWorstMachines)];
+	}
+	else {
+		worstMachine = worstMachines[0];
+	}
+	return worstMachine;
+
+}
+
+// A insertion between two machines who hold Cmax have no reason to happen
+// This is good only for choosing mach2 in insertion moves, because interchange could help decrease Cmax between two Cmax machines (job A in mach1 is better in mach2 and job B in mach2 is better in mach1)
+int getNotACmaxMachine() {
+	int Cmax = 0, ci, worstMachine, i,cWorstMachines = 0;
+	int worstMachines[totalMachines];
+	int achou;
+	// Hint: Maybe there's two machines holding Cmax... after too many iterations, this could happen
+	for(i=0;i < totalMachines;i++) {
+		ci = Ci(i);
+		// Ok, that's the worse machine
+		if(ci > Cmax) {
+			Cmax = ci;
+			// Resets worstMachines counter
+			cWorstMachines = 0;
+			// Reset worstMachines and add this machine to the array
+			memset(worstMachines, 0, sizeof(worstMachines));
+			worstMachines[cWorstMachines] = i;
+		}
+		// Check if we've another machine who also holds Cmax
+		else if(ci == Cmax) {
+			cWorstMachines++;
+			worstMachines[cWorstMachines] = i;
+		}
+	}
+	
+	// Ok, now if I have cWorstMachines > 0 I'll randomly select one that is not of them
+	if(cWorstMachines != 0) {
+		achou =1;
+		while(achou != 0) {
+			achou = 0;
+			worstMachine = getRand(0, totalMachines-1);
+			for(i=0;i<=cWorstMachines;i++) {
+				if(worstMachine == worstMachines[i])
+					achou++;
+			}
+		}
+		
+	}
+	// Get any machine except worstMachines[0], we've only one machine holding Cmax
+	else {
+		worstMachine = getRand(0, totalMachines-1);
+		while(worstMachine != worstMachines[0])
+			worstMachine = getRand(0, totalMachines-1);
+	}
 	return worstMachine;
 }
 

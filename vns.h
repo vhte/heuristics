@@ -6,12 +6,14 @@
  */
 
 
-
+// VNS neighbors are more "aggressive" because normal moves (insertion/interchange) are inside localSearch. Let this method do the simple steps
 void VNS() {
 	// Set how many different neighbors we'll get
 	int neighborhoodSize = 0.1*(totalJobs*(totalMachines-1));
 	int countNaoTeveMelhora = 0,i, k, mach1, mach2,job1,job2,tmp,cmax,contadorOctave;
 	bool teveMelhora;
+	//teste
+	int agressividade = 1,countAgressividade=0;
 
 	Array beforeLocalsearch[totalMachines], octaveX, octaveY;
 	
@@ -30,33 +32,29 @@ void VNS() {
 	
 	//memcpy(&beforeLocalsearch, &machines, sizeof machines);
 	// Same as localSearch, if 15 makespan() did not change, countNaoTeveMelhora.
-	while(countNaoTeveMelhora < 10000) { // neighborhoodSize
+	while(countNaoTeveMelhora < 500) { //neighborhoodSize
 		// Get current cmax
 		cmax = makespan();
 		k = 0;
 		teveMelhora = false;
+		countAgressividade++;
+		if(countAgressividade < 250)
+			agressividade = 1;
+		else if(countAgressividade < 350)
+			agressividade = 2;
+		else
+			agressividade = 3;
+		
+		
 		// Do first neighbor. If not better than current solution, 2nd neighbor... if better, resets, 1st neighbor again
 		// HINT: mach1 in a insertion movement is always the machine who holds Cmax, so we always remove one job from it and Cmax'll be lesser than before :D
+		// Leave small moves (agressividade interchange and 1 insertion to localSearch)
 		while(k < 6) {
-			// 1st neighbor (1 interchange)
+			// 1st neighbor (agressividade interchange 2 insertions)
 			if(k == 0) {
-				// Interchange
-				// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
-				mach1 = getCmaxMachine();
-				//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
-				mach2 = getRand(0, totalMachines-1);
-				
-				while(machines[mach2].used == 0) // Not the same machine
-					mach2 = getRand(0, totalMachines-1);
-
-				// In these machines, get a random job
-				job1 = getRand(0,machines[mach1].used-1);
-				job2 = getRand(0,machines[mach2].used-1);
-
-				// Now interchange them
-				tmp = machines[mach1].array[job1];
-				machines[mach1].array[job1] = machines[mach2].array[job2];
-				machines[mach2].array[job2] = tmp;
+				moveInterchange(agressividade);
+				moveInsertion(agressividade);
+				moveInsertion(agressividade);
 
 				// Do local search
 				localSearch();
@@ -74,6 +72,7 @@ void VNS() {
 					
 					// Returns to the first neighbor
 					k = 0;
+					countAgressividade = 0;
 					continue; // Resets while
 				}
 				else {
@@ -83,22 +82,11 @@ void VNS() {
 					// end if-else structure and adds 1 in k
 				}
 			}
-			// 2nd neighbor (1 insertion)
+			// 2nd neighbor (agressividade insertion 2 interchanges)
 			else if(k == 1) {
-				// Let's insert
-				// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
-				mach1 = getCmaxMachine();
-
-				// Machine2, where the job'll be placed
-				mach2 = getNotACmaxMachine(); //getRand(0, totalMachines-1);
-
-				// One job from mach1
-				job1 = getRand(0,machines[mach1].used-1);
-				// Insert this job in mach2
-				insertArray(&machines[mach2], machines[mach1].array[job1]);
-
-				// Remove this job from mach1
-				removeArray(&machines[mach1], job1);
+				moveInsertion(agressividade);
+				moveInterchange(agressividade);
+				moveInterchange(agressividade);
 
 				// Do local search
 				localSearch();
@@ -114,6 +102,7 @@ void VNS() {
 					
 					// Return to the first neighbor
 					k = 0;
+					countAgressividade = 0;
 					continue; // Resets while
 				}
 				else {
@@ -123,42 +112,12 @@ void VNS() {
 					// end if-else structure and adds 1 in k
 				}
 			}
-			// 3rd neighbor (2 interchanges)
+			// 3rd neighbor (2 interchanges after 2 insertions)
 			else if(k == 2) {
-				// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
-				mach1 = getCmaxMachine();
-				//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
-				mach2 = getRand(0, totalMachines-1);
-				
-				while(machines[mach2].used == 0) // Not the same machine
-					mach2 = getRand(0, totalMachines-1);
-
-				// In these machines, get a random job
-				job1 = getRand(0,machines[mach1].used-1);
-				job2 = getRand(0,machines[mach2].used-1);
-
-				// Now interchange them
-				tmp = machines[mach1].array[job1];
-				machines[mach1].array[job1] = machines[mach2].array[job2];
-				machines[mach2].array[job2] = tmp;
-				
-				// Interchange again
-				// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
-				mach1 = getCmaxMachine();
-				//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
-				mach2 = getRand(0, totalMachines-1);
-				
-				while(machines[mach2].used == 0) // Not the same machine
-					mach2 = getRand(0, totalMachines-1);
-
-				// In these machines, get a random job
-				job1 = getRand(0,machines[mach1].used-1);
-				job2 = getRand(0,machines[mach2].used-1);
-
-				// Now interchange them
-				tmp = machines[mach1].array[job1];
-				machines[mach1].array[job1] = machines[mach2].array[job2];
-				machines[mach2].array[job2] = tmp;
+				moveInsertion(agressividade);
+				moveInsertion(agressividade);
+				moveInterchange(agressividade);
+				moveInterchange(agressividade);
 				
 				// Do local search
 				localSearch();
@@ -177,6 +136,7 @@ void VNS() {
 					
 					// Return to the first neighbor
 					k = 0;
+					countAgressividade = 0;
 					continue; // Resets while
 				}
 				else {
@@ -186,35 +146,11 @@ void VNS() {
 					// end if-else structure and adds 1 in k
 				}
 			}
-			// 4th neighbor (2 insertions)
+			// 4th neighbor (3 insertions)
 			else if(k == 3) {
-				// Let's insert
-				// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
-				mach1 = getCmaxMachine();
-				// Machine2, where the job'll be placed
-				mach2 = getNotACmaxMachine(); //getRand(0, totalMachines-1);
-
-				// One job from mach1
-				job1 = getRand(0,machines[mach1].used-1);
-				// Insert this job in mach2
-				insertArray(&machines[mach2], machines[mach1].array[job1]);
-
-				// Remove this job from mach1
-				removeArray(&machines[mach1], job1);
-
-				// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
-				mach1 = getCmaxMachine();
-
-				// Machine2, where the job'll be placed
-				mach2 = getNotACmaxMachine();//getRand(0, totalMachines-1);
-
-				// One job from mach1
-				job1 = getRand(0,machines[mach1].used-1);
-				// Insert this job in mach2
-				insertArray(&machines[mach2], machines[mach1].array[job1]);
-
-				// Remove this job from mach1
-				removeArray(&machines[mach1], job1);
+				moveInsertion(agressividade);
+				moveInsertion(agressividade);
+				moveInsertion(agressividade);
 				
 				// Do local search
 				localSearch();
@@ -230,7 +166,7 @@ void VNS() {
 					
 					// Return to the first neighbor*
 					k = 0;
-					
+					countAgressividade = 0;
 					continue; // Resets while
 				}
 				else {
@@ -240,39 +176,11 @@ void VNS() {
 					// end if-else structure and adds 1 in k
 				}
 			}
-			// 5th neighbor (1 interchange, 1 insertion)
+			// 5th neighbor (3 interchanges)
 			else if(k == 4) {
-				// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
-				mach1 = getCmaxMachine();
-				//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
-				mach2 = getRand(0, totalMachines-1);
-				
-				while(machines[mach2].used == 0) // Not the same machine
-					mach2 = getRand(0, totalMachines-1);
-
-				// In these machines, get a random job
-				job1 = getRand(0,machines[mach1].used-1);
-				job2 = getRand(0,machines[mach2].used-1);
-
-				// Now interchange them
-				tmp = machines[mach1].array[job1];
-				machines[mach1].array[job1] = machines[mach2].array[job2];
-				machines[mach2].array[job2] = tmp;
-				
-				// Let's insert
-				// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
-				mach1 = getCmaxMachine();
-
-				// Machine2, where the job'll be placed
-				mach2 = getNotACmaxMachine();//getRand(0, totalMachines-1);
-
-				// One job from mach1
-				job1 = getRand(0,machines[mach1].used-1);
-				// Insert this job in mach2
-				insertArray(&machines[mach2], machines[mach1].array[job1]);
-
-				// Remove this job from mach1
-				removeArray(&machines[mach1], job1);
+				moveInterchange(agressividade);
+				moveInterchange(agressividade);
+				moveInterchange(agressividade);
 				
 				// Do local search
 				localSearch();
@@ -288,7 +196,7 @@ void VNS() {
 					
 					// Return to the first neighbor
 					k = 0;
-					
+					countAgressividade = 0;
 					continue; // Resets while
 				}
 				else {
@@ -298,71 +206,14 @@ void VNS() {
 					// end if-else structure and adds 1 in k
 				}
 			}
-			// 5th neighbor (2 interchanges before 2 insertions)
+			// 5th neighbor (3 insertions interspersed by 3 interchanges)
 			else if(k == 5) {
-				// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
-				mach1 = getCmaxMachine();
-				//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
-				mach2 = getRand(0, totalMachines-1);
-				
-				while(machines[mach2].used == 0) // Not the same machine
-					mach2 = getRand(0, totalMachines-1);
-
-				// In these machines, get a random job
-				job1 = getRand(0,machines[mach1].used-1);
-				job2 = getRand(0,machines[mach2].used-1);
-
-				// Now interchange them
-				tmp = machines[mach1].array[job1];
-				machines[mach1].array[job1] = machines[mach2].array[job2];
-				machines[mach2].array[job2] = tmp;
-				
-				// Interchange again
-				// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
-				mach1 = getCmaxMachine();
-				//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
-				mach2 = getRand(0, totalMachines-1);
-				
-				while(machines[mach2].used == 0) // Not the same machine
-					mach2 = getRand(0, totalMachines-1);
-
-				// In these machines, get a random job
-				job1 = getRand(0,machines[mach1].used-1);
-				job2 = getRand(0,machines[mach2].used-1);
-
-				// Now interchange them
-				tmp = machines[mach1].array[job1];
-				machines[mach1].array[job1] = machines[mach2].array[job2];
-				machines[mach2].array[job2] = tmp;
-				
-				// Let's insert
-				// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
-				mach1 = getCmaxMachine();
-
-				// Machine2, where the job'll be placed
-				mach2 = getNotACmaxMachine();//getRand(0, totalMachines-1);
-
-				// One job from mach1
-				job1 = getRand(0,machines[mach1].used-1);
-				// Insert this job in mach2
-				insertArray(&machines[mach2], machines[mach1].array[job1]);
-
-				// Remove this job from mach1
-				removeArray(&machines[mach1], job1);
-
-				// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
-				mach1 = getCmaxMachine();
-
-				// Machine2, where the job'll be placed
-				mach2 = getNotACmaxMachine();//getRand(0, totalMachines-1);
-
-				// One job from mach1
-				job1 = getRand(0,machines[mach1].used-1);
-				// Insert this job in mach2
-				insertArray(&machines[mach2], machines[mach1].array[job1]);
-
-				// Remove this job from mach1
-				removeArray(&machines[mach1], job1);
+				moveInsertion(agressividade);
+				moveInterchange(agressividade);
+				moveInsertion(agressividade);
+				moveInterchange(agressividade);
+				moveInsertion(agressividade);
+				moveInterchange(agressividade);
 				
 				// Do local search
 				localSearch();
@@ -379,7 +230,7 @@ void VNS() {
 					
 					// Return to the first neighbor
 					k = 0;
-					
+					countAgressividade = 0;
 					continue; // Resets while
 				}
 				else {
@@ -407,7 +258,7 @@ void VNS() {
 	}
 	printf("VNS: %d\n", makespan());
 	// Armazena em arquivo resultado do octave
-	report('V', &octaveX, &octaveY, totalJobs, totalMachines);
+	//report('V', &octaveX, &octaveY, totalJobs, totalMachines);
 	
 	
 	

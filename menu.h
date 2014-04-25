@@ -14,7 +14,7 @@ void generateMenu() {
 	printf("3 - Local Search\n");
 	printf("4 - Genetic Algorithm (GA)\n");
 	printf("5 - VNS\n");
-	printf("6 - Iterated Greedy\n");
+	printf("6 - GRASP+VNS\n");
 	printf("7 - Exit\n");
 	
 	/*
@@ -46,11 +46,17 @@ void generateMenu() {
 			generateMenu();
 			break;
 		case '5':
-			printf("VNS0\n");
 			time(&start);
 			VNS();
 			time(&tempo);
-			printf("Finished in about %.0f seconds. \n", difftime(tempo, start));
+			printf("\nFinished in about %.0f seconds. \n", difftime(tempo, start));
+			generateMenu();
+			break;
+		case '6':
+			time(&start);
+			GRASP();
+			time(&tempo);
+			printf("\nFinished in about %.0f seconds. \n", difftime(tempo, start));
 			generateMenu();
 			break;
 		// Exits the program

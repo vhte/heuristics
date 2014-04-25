@@ -29,6 +29,7 @@ char solucaoInicial; // report
 #include "local.h" // localSearch, readFile, initialSolution...
 #include "octave.h" // report
 #include "vns.h"
+#include "grasp.h"
 #include "ga.h"
 #include "menu.h"
 

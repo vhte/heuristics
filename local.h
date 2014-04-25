@@ -337,13 +337,13 @@ void localSearch() {
 		if(getRand(0,1) == 0) {
 			// Interchange
 			// I need two machines. Find them randomly
-			mach1 = getRand(0, totalMachines-1);
+			mach1 = getCmaxMachine();//getRand(0, totalMachines-1);
 			//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
-			while(machines[mach1].used == 0)
-				mach1 = getRand(0, totalMachines-1);
+			/*while(machines[mach1].used == 0)
+				mach1 = getRand(0, totalMachines-1);*/
 			//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
 			mach2 = getRand(0, totalMachines-1);
-			while(machines[mach2].used == 0) // Not the same machine
+			while(machines[mach2].used == 0 || mach2 == mach1) // Not the same machine
 				mach2 = getRand(0, totalMachines-1);
 		
 			// In these machines, get a random job
@@ -378,14 +378,16 @@ void localSearch() {
 		}
 		else { // insertion
 			// I need two machines, one to retrieve, one to receive. Find them randomly
-			mach1 = getRand(0, totalMachines-1);
+			mach1 = getCmaxMachine();//getRand(0, totalMachines-1);
 			//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
-			while(machines[mach1].used == 0)
-				mach1 = getRand(0, totalMachines-1);
+			/*while(machines[mach1].used == 0)
+				mach1 = getRand(0, totalMachines-1);*/
 
 			// Machine2, where the job'll be placed
-			mach2 = getRand(0, totalMachines-1);
-
+			mach2 = getNotACmaxMachine();//getRand(0, totalMachines-1);
+			while(mach2 == mach1) // Not the same machine
+				mach2 = getRand(0, totalMachines-1);
+				
 			// One job from mach1
 			job1 = getRand(0,machines[mach1].used-1);
 			// Insert this job in mach2
@@ -449,6 +451,52 @@ void localSearch() {
 	//printf("makespan after RVND: %d\n", makespan());
 	// That's it, localSearch RVND is done
 	return;
+}
+
+void moveInterchange(int times) {
+	int mach1,mach2,job1,job2,tmp,i;
+	
+	for(i=0;i<times;i++) {
+		// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
+		mach1 = getCmaxMachine();
+		//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
+		mach2 = getRand(0, totalMachines-1);
+
+		while(machines[mach2].used == 0 || mach2 == mach1) // Not the same machine
+			mach2 = getRand(0, totalMachines-1);
+
+		// In these machines, get a random job
+		job1 = getRand(0,machines[mach1].used-1);
+		job2 = getRand(0,machines[mach2].used-1);
+
+		// Now interchange them
+		tmp = machines[mach1].array[job1];
+		machines[mach1].array[job1] = machines[mach2].array[job2];
+		machines[mach2].array[job2] = tmp;
+	}
+	
+}
+
+void moveInsertion(int times) {
+	int mach1,mach2,job1,i;
+	
+	// Let's insert
+	for(i=0;i<times;i++) {
+		// I need two machines. The first one is always who holds Cmax (so insertion'll remove a job and interchange'll modify Cmax)
+		mach1 = getCmaxMachine();
+
+		// Machine2, where the job'll be placed
+		mach2 = getNotACmaxMachine(); //getRand(0, totalMachines-1);
+
+		// One job from mach1
+		job1 = getRand(0,machines[mach1].used-1);
+		// Insert this job in mach2
+		insertArray(&machines[mach2], machines[mach1].array[job1]);
+
+		// Remove this job from mach1
+		removeArray(&machines[mach1], job1);
+	}
+	
 }
 
 // Generate Random Solution for GA

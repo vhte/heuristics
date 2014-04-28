@@ -13,9 +13,10 @@ void generateMenu() {
 	printf("2 - Generates initial solution (Random)\n");
 	printf("3 - Local Search\n");
 	printf("4 - Genetic Algorithm (GA)\n");
-	printf("5 - VNS\n");
-	printf("6 - GRASP+VNS\n");
-	printf("7 - Exit\n");
+	printf("5 - Genetic Algorithm2 (GA2)\n");
+	printf("6 - VNS\n");
+	printf("7 - GRASP+VNS\n");
+	printf("8 - Exit\n");
 	
 	/*
 	 The most common error when using getchar() is to try and use a char variable to store the result. You need to use an int variable, since the range of values getchar() returns is "a value in the range of unsigned char, plus the single negative value EOF". A char variable doesn't have sufficient range for this, which can mean that you can confuse a completely valid character return with EOF. The same applies to getc().
@@ -47,12 +48,19 @@ void generateMenu() {
 			break;
 		case '5':
 			time(&start);
-			VNS();
+			GA2();
 			time(&tempo);
 			printf("\nFinished in about %.0f seconds. \n", difftime(tempo, start));
 			generateMenu();
 			break;
 		case '6':
+			time(&start);
+			VNS();
+			time(&tempo);
+			printf("\nFinished in about %.0f seconds. \n", difftime(tempo, start));
+			generateMenu();
+			break;
+		case '7':
 			time(&start);
 			GRASP();
 			time(&tempo);
@@ -60,7 +68,7 @@ void generateMenu() {
 			generateMenu();
 			break;
 		// Exits the program
-		case '7':
+		case '8':
 			// Clean dynamic arrays
 			//freeArray(&jobs[i-3].job.maquina);
 			exit(EXIT_SUCCESS); // EXIT_FAILURE

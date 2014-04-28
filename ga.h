@@ -6,8 +6,9 @@
  */
 // Genetic Algorithm
 // Another possible representation: n-ary. <3,7,1,2> means job 0 is in machine 3, job 2 is in machine 7...
-// Actual representation: chromosome = machine AND gene = job
-// Gene = Job
+// Cromossomo: Maquina
+// Gene: Tarefa
+// Populacao: 10
 void GA() {
 	int t, worst, neighborhoodSize, pCrossover, pMutacao,tmp,tmp2,maqMutacaoFilho1,maqMutacaoFilho2;
 	float pGenesAfetados,pTrocaGenes,pAtual;

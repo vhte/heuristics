@@ -31,6 +31,7 @@ char solucaoInicial; // report
 #include "vns.h"
 #include "grasp.h"
 #include "ga.h"
+#include "ga2.h"
 #include "menu.h"
 
 int main(int argc, char** argv) {

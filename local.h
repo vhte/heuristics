@@ -291,7 +291,7 @@ int getNotACmaxMachine() {
 	// Get any machine except worstMachines[0], we've only one machine holding Cmax
 	else {
 		worstMachine = getRand(0, totalMachines-1);
-		while(worstMachine != worstMachines[0])
+		while(worstMachine == worstMachines[0])
 			worstMachine = getRand(0, totalMachines-1);
 	}
 	return worstMachine;

@@ -4,6 +4,136 @@
  *
  * Created on April 27, 2014, 12:47 PM
  */
+void buscaLocalGA2(Array *individuo) {
+	
+	int iteration = 0, vizinhanca, mach1,mach2,job1,job2,tmp,worst,bestMach1,bestMach2,bestJob1,bestJob2,k,j;
+	char mov; // inter'c'hange or 'i'nsertion. Need this to replace current solution to its best neighbor
+	
+	// How many iterations I'll make to get the best.  10% of totalJobs*(totalMachines-1) NEIGHBORHOOD
+	vizinhanca = 0.1*(totalJobs*(totalMachines-1));
+	//printf("TAMANHO VIZINHANCA: %d\n", vizinhanca);
+	
+	// The worst solution is INT_MAX just to tell the 1st neighbor is the best and initialize
+	worst = INT_MAX;
+	
+	while(iteration < vizinhanca) {
+		// Using DescidaRandomica
+		// Choose 0 for interchange, 1 for insertion
+		
+		if(getRand(0,1) == 0) {
+			// Interchange
+			// I need two machines. Find them randomly
+			mach1 = getCmaxMachineGA2(individuo);//getRand(0, totalMachines-1);
+			
+			//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
+			mach2 = getRand(0, totalMachines-1);
+			while(individuo[mach2].used == 0 || mach2 == mach1) // Not the same machine
+				mach2 = getRand(0, totalMachines-1);
+		
+			// In these machines, get a random job
+			job1 = getRand(0,individuo[mach1].used-1);
+			job2 = getRand(0,individuo[mach2].used-1);
+			// Now interchange them
+			
+			
+			tmp = individuo[mach1].array[job1];
+			individuo[mach1].array[job1] = individuo[mach2].array[job2];
+			individuo[mach2].array[job2] = tmp;
+			
+			
+			// I'll now check if this solution is better than the best neighbor so far.
+			if(makespan() < worst) {
+				// Ok, that's the best neighbor now. Let's store it details
+				mov = 'c'; //interchange
+				bestMach1 = mach1;
+				bestMach2 = mach2;
+				bestJob1 = job1;
+				bestJob2 = job2;
+				// Just interchange positions, piece of cake.
+				// Update worst value to this neighbor makespan()
+				worst = makespanGA2(individuo);
+			}
+			// Rollback to generate another neighbor
+			tmp = individuo[mach1].array[job1];
+			individuo[mach1].array[job1] = individuo[mach2].array[job2];
+			individuo[mach2].array[job2] = tmp;
+		}
+		else { // insertion
+			// I need two machines, one to retrieve, one to receive. Find them randomly
+			mach1 = getCmaxMachine();//getRand(0, totalMachines-1);
+			//Maybe after too many inserts, this machine got 0 jobs inside it. I need to avoid this selecting another machine
+			/*while(machines[mach1].used == 0)
+				mach1 = getRand(0, totalMachines-1);*/
+
+			// Machine2, where the job'll be placed
+			mach2 = getNotACmaxMachineGA2(individuo);//getRand(0, totalMachines-1);
+			while(mach2 == mach1) // Not the same machine
+				mach2 = getRand(0, totalMachines-1);
+				
+			// One job from mach1
+			job1 = getRand(0,individuo[mach1].used-1);
+			// Insert this job in mach2
+			insertArray(&individuo[mach2], individuo[mach1].array[job1]);
+			
+			// Remove this job from mach1
+			removeArray(&individuo[mach1], job1);
+			
+			// I'll now check if this solution is better than the best neighbor so far.
+			if(makespan() < worst) {
+				
+				// Ok, that's the best neighbor now. Let's store it details
+				mov = 'i'; //insertion
+				bestMach1 = mach1; // One which job1 is removed
+				bestJob1 = job1;
+				bestMach2 = mach2; // One which job1 is reallocated
+				// To make the change, just remove used-1 pos from mach2 and allocate it's value to mach1
+				
+				// Update worst value to this neighbor makespan()
+				worst = makespanGA2(individuo);
+			}
+			
+			// Rollback to get another neighbor
+			insertArray(&individuo[mach1], individuo[mach2].array[individuo[mach2].used-1]);
+			removeArray(&individuo[mach2], individuo[mach2].used-1);
+		
+		}
+
+		// Ok, after neighbor found, check if it's worse is better than actual makespan() accepting equal values (so we can run around neighborhood)
+		if(worst < makespan()) {
+			// The neighbor is better than actual solution
+			// Make the change
+			
+			
+			if(mov == 'c') {
+				tmp = individuo[bestMach1].array[bestJob1];
+				individuo[bestMach1].array[bestJob1] = individuo[bestMach2].array[bestJob2];
+				individuo[bestMach2].array[bestJob2] = tmp;
+				
+			}
+			else { // mov == 'i'
+				insertArray(&individuo[mach2], individuo[mach1].array[individuo[mach1].used-1]);
+				removeArray(&individuo[mach1], individuo[mach1].used-1);
+			}
+			
+			// resets iteration counter
+			iteration = 0; 
+		}
+		else
+			iteration++;
+	
+		/*
+		// Now let's check if makespan() = worst.
+		if(makespan() == worst)
+			equalRounds++;
+		else
+			equalRounds = 0;
+		*/
+		
+	} // end equalRounds
+	//printf("makespan after RVND: %d\n", makespan());
+	// That's it, localSearch RVND is done
+	return;
+}
 int makespanGA2(Array *individuo) {
 	
 	int i = 0, worstTime = 0, worstMachine, tmp;
@@ -133,11 +263,12 @@ void geraSolucaoInicial(Array *individuo) {
 	return;
 }
 
+// @todo localSearch()
 void GA2() {
 	int tamanhoPopulacao = 10,i,j,k,l,tmp,tmp2,duplicou,pai1C,pai2C,pCrossover,pMutacao,t,maqTarefa1,posTarefa1,maqTarefa2,posTarefa2, maqMutacao,tarefaMutacao,piorIndividuo,ciPiorIndividuo;
 	Array populacao[tamanhoPopulacao][totalMachines];
-	Array pai1,pai2,filhoGerado[totalMachines];
-	Array tarefasNaoEncontradas;
+	Array filhoGerado[totalMachines];
+	Array tarefasNaoEncontradas, octaveX, octaveY;;
 	bool haFilhos,houveMutacao, achou;
 	
 	initArray(&tarefasNaoEncontradas,1);
@@ -162,16 +293,21 @@ void GA2() {
 	printf("Primeiro job da primeira maquina do primeiro individuo: %d\n", populacao[0][0].array[0]);
 	printf("Segundo job da segunda maquina do segundo individuo: %d\n", populacao[1][1].array[1]);
 	
+	// Octave (printar a evolucao do AG)
+	initArray(&octaveX, 1); // Stores ASCII values to plot AG results
+	initArray(&octaveY, 1); // Stores ASCII values to plot AG results
+	
 	// Probabilidade de crossover
 	pCrossover = 80; // 80% (80)
 	
 	// Probabilidade pMutacao
-	pMutacao = 5; // Aplicar radioatividade?
+	pMutacao = 10; // Aplicar radioatividade?
 	
 	// Tempo 0
 	t = 0;
 	
-	while(t < 30) {
+	while(t < 1000) {
+		insertArray(&octaveX, t);
 		t++;
 		
 		// Tell no second generation population exists
@@ -183,12 +319,12 @@ void GA2() {
 			haFilhos = true;
 			initArray(&tarefasNaoEncontradas,1);
 			
-			// Invididuos "pais"
+			// Invididuos "pais": Os individuos da populacao que tem melhores Ci()
 			pai1C = getRand(0,tamanhoPopulacao-1);
 			pai2C = getRand(0,tamanhoPopulacao-1);
 			while(pai2C == pai1C)
 				pai2C = getRand(0,tamanhoPopulacao-1);
-			pai1C = 8;pai2C=9;
+			//pai1C = 8;pai2C=9;
 			// Iniciando as maquinas de filhoGerado
 			for(i=0;i<totalMachines;i++)
 				initArray(&filhoGerado[i], 1);
@@ -291,15 +427,18 @@ void GA2() {
 			
 			// MUTAÇÃO
 			if(getRand(0,100) < pMutacao) {
-				// Pega o filho gerado e troca uma tarefa da máquina de Cmax com outra qualquer que não Cmax
-				maqMutacao = getCmaxMachineGA2(&filhoGerado);
-				printf("maqMutacao: %d\n", maqMutacao);
-				tarefaMutacao = getRand(0,filhoGerado[maqMutacao].used-1);
-				printf("tarefaMutacao: %d\n", tarefaMutacao);
-				tmp = getNotACmaxMachineGA2(&filhoGerado);
-				printf("getNotACmaxMachineGA2: %d\n", tmp);
-				insertArray(&filhoGerado[tmp], filhoGerado[maqMutacao].array[tarefaMutacao]);
-				removeArray(&filhoGerado[maqMutacao], tarefaMutacao);
+				//for(i=0;i<10;i++) {
+					// Pega o filho gerado e troca uma tarefa da máquina de Cmax com outra qualquer que não Cmax
+					maqMutacao = getCmaxMachineGA2(&filhoGerado);
+					printf("maqMutacao: %d\n", maqMutacao);
+					tarefaMutacao = getRand(0,filhoGerado[maqMutacao].used-1);
+					printf("tarefaMutacao: %d\n", tarefaMutacao);
+					tmp = getNotACmaxMachineGA2(&filhoGerado);
+					printf("getNotACmaxMachineGA2: %d\n", tmp);
+					insertArray(&filhoGerado[tmp], filhoGerado[maqMutacao].array[tarefaMutacao]);
+					removeArray(&filhoGerado[maqMutacao], tarefaMutacao);
+				//}
+				
 			}
 			
 			printf("FILHO DEPOIS DA MUTACAO\n");
@@ -340,9 +479,19 @@ void GA2() {
 				freeArray(&filhoGerado[i]);
 		}
 		
+		insertArray(&octaveY, makespanGA2(&populacao));
+		
 	}
 	
-	printf("\n\nFIM GA2\nmakespan(): %d\n", makespanGA2(&populacao));
+	printf("\n\nFIM GA2\nmakespan() sem buscaLocal: %d\n", makespanGA2(&populacao));
+	
+	// Executa busca local
+	for(i=0;i<tamanhoPopulacao;i++) {
+		buscaLocalGA2(&populacao[i]);
+	}
+	printf("\n\nFIM GA2\nmakespan() com buscaLocal: %d\n", makespanGA2(&populacao));
+	// Armazena em arquivo resultado do octave
+	report('G', &octaveX, &octaveY, totalJobs, totalMachines);
 }
 
 
